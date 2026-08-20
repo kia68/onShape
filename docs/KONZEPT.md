@@ -1076,7 +1076,7 @@ CREATE INDEX ON barcode_scans (barcode);   -- treibt "häufig gescannt, aber nic
 
 ## 9. API-Design
 
-**Stil:** tRPC für den eigenen Web-Client (Ende-zu-Ende-Typsicherheit ohne Codegenerierung), zusätzlich eine öffentliche REST-Schicht unter `/api/v1` für Integrationen und eine spätere native App.
+**Stil:** Einheitlich REST unter `/api/v1` (Spring Boot, OpenAPI/Swagger-dokumentiert). Das Next.js-Frontend konsumiert dieselbe REST-Schicht über TanStack Query (ein aus der OpenAPI-Spec generierter TS-Client ersetzt die ursprünglich geplante tRPC-Typsicherheit); dieselbe Schicht bedient auch Integrationen und eine spätere native App.
 
 **Konventionen:** JSON, `Accept-Language` steuert die Sprache aller Textfelder, Cursor-Pagination, RFC 9457 Problem Details für Fehler, Idempotenz über `Idempotency-Key`-Header bei allen Schreibvorgängen.
 
@@ -1225,18 +1225,19 @@ Konfliktstrategie: **Feld-Level Last-Write-Wins** mit Server-Zeitstempel als Tie
 
 | Schicht | Wahl | Begründung |
 |---|---|---|
-| Framework | **Next.js 15 (App Router) + React 19, TypeScript** | Server Components reduzieren die JS-Last spürbar, ein Deployment-Ziel für Web + PWA, starkes Ökosystem |
+| Backend | **Kotlin + Spring Boot 3**, Gradle | Typsicherer, etablierter JVM-Stack; Team-Entscheidung, ersetzt das ursprünglich skizzierte Node/TS-Backend |
+| Frontend | **Next.js 15 (App Router) + React 19, TypeScript** | Server Components reduzieren die JS-Last spürbar, ein Deployment-Ziel für Web + PWA, starkes Ökosystem |
 | Styling | **Tailwind CSS + shadcn/ui** | Schnell, konsistent, barrierefreie Primitives (Radix) |
 | State (Server) | **TanStack Query** | Cache, Optimistic Updates, Offline-Mutation-Queue |
 | State (lokal) | **Zustand** | Klein, kein Boilerplate |
-| API | **tRPC** intern, **REST** öffentlich | Typsicherheit intern, Standardkonformität nach außen |
+| API | **REST** (Spring Boot, OpenAPI/Swagger-dokumentiert) | Einheitliche Schicht für Frontend, Integrationen und spätere native App; TS-Client für das Frontend aus der OpenAPI-Spec generiert (ersetzt tRPC, das ein TS-Backend vorausgesetzt hätte) |
 | Datenbank | **PostgreSQL 17** | Volltextsuche, `pg_trgm`, JSONB, `pgvector` für spätere semantische Suche |
-| ORM | **Drizzle** | SQL-nah, leichtgewichtig, gute Migrationen, TS-nativ |
+| ORM / Migrationen | **Spring Data JPA** (oder Exposed) + **Flyway** | Etablierter Kotlin/Spring-Standard, Migrationen versioniert und nachvollziehbar |
 | Lokale DB | **IndexedDB via Dexie.js** | Praktischer Standard für Offline-PWA; OPFS/SQLite-WASM ist die Ausbaustufe, aber Safari-Support ist noch heikel |
 | Sync | Eigene Queue über TanStack Query + Dexie | CRDT-Bibliotheken sind für additive Einträge Overkill; Feld-Level-LWW deckt die Konflikte ab |
-| Auth | **Auth.js (NextAuth) v5** oder **Lucia** | Selbst gehostet, kein Nutzerdaten-Abfluss zu Dritten |
+| Auth | **Spring Security** + OAuth2-Client (Apple/Google) + WebAuthn4j (Passkeys) | Serverseitig im Kotlin-Backend, selbst gehostet, kein Nutzerdaten-Abfluss zu Dritten |
 | Objektspeicher | **Hetzner Object Storage** (S3-kompatibel), EU | Videos, Bilder — deutlich günstiger als AWS |
-| Hosting | **Hetzner Cloud (Falkenstein/Nürnberg)** + Docker + Coolify, alternativ Vercel EU-Region | DSGVO-Positionierung ist Teil des Produktversprechens |
+| Hosting | **Hetzner Cloud (Falkenstein/Nürnberg)** + Docker + Coolify | DSGVO-Positionierung ist Teil des Produktversprechens |
 | CDN | **BunnyCDN** (EU-Perimeter konfigurierbar) | Videoauslieferung, günstig |
 | Pose Estimation | **MediaPipe Pose (Tasks Vision, WASM)** | Läuft vollständig im Browser, kein Serverkontakt — die einzige datenschutzkonforme Option für Videoanalyse |
 | Barcode | `BarcodeDetector` API, Fallback `zxing-wasm` | Nativ wo verfügbar, sonst WASM |
@@ -1244,7 +1245,7 @@ Konfliktstrategie: **Feld-Level Last-Write-Wins** mit Server-Zeitstempel als Tie
 | E-Mail | **Postmark EU** oder **Brevo** | Transaktional, DSGVO-konform |
 | Fehler/Analytics | **Sentry (self-hosted)** + **Plausible/Umami (self-hosted)** | Kein Google Analytics, keine Drittland-Übermittlung |
 | Zahlungen | **Stripe** mit EU-Entität | Standard, gute SCA-Unterstützung |
-| Tests | Vitest, Playwright, Testcontainers | Unit, E2E, DB-Integration |
+| Tests | **Kotest/JUnit5 + MockK** (Backend), Vitest + Playwright (Frontend), Testcontainers (DB-Integration) | Unit/Integration/E2E über beide Schichten |
 
 ### 10.2 Warum PWA und nicht native App
 
@@ -1267,9 +1268,9 @@ Konfliktstrategie: **Feld-Level Last-Write-Wins** mit Server-Zeitstempel als Tie
 │  ├── MediaPipe Pose WASM  ← Video verlässt das Gerät nie   │
 │  └── BarcodeDetector / zxing-wasm                          │
 └──────────────────┬─────────────────────────────────────────┘
-                   │ HTTPS, tRPC + REST
+                   │ HTTPS, REST (OpenAPI)
 ┌──────────────────▼─────────────────────────────────────────┐
-│  Next.js Server (Hetzner, Falkenstein)                     │
+│  Spring Boot Server (Kotlin, Hetzner Falkenstein)           │
 │  ├── Auth / Session                                        │
 │  ├── Domain Services                                       │
 │  │   ├── NutritionTargetService  (BMR, TDEE, Makros)       │
@@ -1639,7 +1640,7 @@ Auf den ersten Blick verschenken wir das Feature, für das MFP 79,99 $ verlangt.
 ### Phase 0 — Fundament (Wochen 1–4)
 
 - [ ] Repository, CI/CD, Umgebungen (dev/staging/prod)
-- [ ] Datenbankschema + Migrationen (Drizzle)
+- [ ] Datenbankschema + Migrationen (Spring Data JPA/Exposed + Flyway)
 - [ ] **Daten-Pipeline: BLS 4.0 + USDA + Open Food Facts importieren, deduplizieren, validieren**
 - [ ] Auth, Profil, Onboarding-Flow
 - [ ] i18n-Grundgerüst DE/EN

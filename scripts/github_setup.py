@@ -232,7 +232,8 @@ TASKS = [
     T("infra", "INFRA-01", "Repository, CI/CD, Umgebungen",
       "Repository-Setup, CI/CD-Pipeline, Umgebungen dev/staging/prod.", "phase0"),
     T("infra", "INFRA-02", "Datenbankschema + Migrationen",
-      "Vollstaendiges PostgreSQL-Schema aus §8 als Drizzle-Migrationen: "
+      "Vollstaendiges PostgreSQL-Schema aus §8 als Flyway-Migrationen "
+      "(Spring Data JPA oder Exposed als ORM): "
       "users, profiles, nutrition_targets, foods, food_servings, food_entries, "
       "recipes, recipe_items, exercises, exercise_muscles, exercise_mistakes, "
       "exercise_form_rules, programs, program_days, program_items, "

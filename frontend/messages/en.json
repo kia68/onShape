@@ -1,0 +1,14 @@
+{
+  "Home": {
+    "title": "OnShape",
+    "tagline": "Nutrition, training and progress in one place.",
+    "workoutSummary": "{sets, plural, =0 {No sets} one {1 set} other {# sets}} logged today.",
+    "todayLabel": "Today is {date, date, long}",
+    "weightLabel": "Current weight: {weight, number, ::.0}kg"
+  },
+  "Nav": {
+    "nutrition": "Nutrition",
+    "training": "Training",
+    "progress": "Progress"
+  }
+}

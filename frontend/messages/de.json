@@ -1,0 +1,14 @@
+{
+  "Home": {
+    "title": "OnShape",
+    "tagline": "Ernährung, Training und Fortschritt an einem Ort.",
+    "workoutSummary": "Heute {sets, plural, =0 {keine Sätze} one {1 Satz} other {# Sätze}} protokolliert.",
+    "todayLabel": "Heute ist der {date, date, long}",
+    "weightLabel": "Aktuelles Gewicht: {weight, number, ::.0}kg"
+  },
+  "Nav": {
+    "nutrition": "Ernährung",
+    "training": "Training",
+    "progress": "Fortschritt"
+  }
+}

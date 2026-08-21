@@ -10,5 +10,137 @@
     "nutrition": "Ernährung",
     "training": "Training",
     "progress": "Fortschritt"
+  },
+  "Onboarding": {
+    "progressLabel": "Schritt {step} von {total}",
+    "back": "Zurück",
+    "next": "Weiter",
+    "skipWithDefaults": "Mit Standardwerten fertigstellen",
+    "account": {
+      "title": "Konto erstellen",
+      "subtitle": "Registrierung per E-Mail und Passwort. Apple/Google folgen, sobald angebunden.",
+      "emailLabel": "E-Mail",
+      "passwordLabel": "Passwort",
+      "passwordHint": "Mindestens 8 Zeichen",
+      "submit": "Konto erstellen",
+      "switchToLogin": "Schon ein Konto? Anmelden",
+      "switchToRegister": "Noch kein Konto? Registrieren",
+      "loginTitle": "Anmelden",
+      "loginSubmit": "Anmelden"
+    },
+    "basics": {
+      "title": "Über dich",
+      "sexLabel": "Geschlecht",
+      "sex": { "male": "Männlich", "female": "Weiblich", "other": "Divers", "unspecified": "Keine Angabe" },
+      "birthDateLabel": "Geburtsdatum",
+      "heightLabel": "Größe (cm)",
+      "weightLabel": "Gewicht (kg)",
+      "bodyFatLabel": "Körperfettanteil % (optional, für genauere Berechnung)",
+      "experienceLabel": "Trainingserfahrung",
+      "experience": {
+        "none": "Noch nie trainiert",
+        "beginner": "Weniger als 6 Monate",
+        "intermediate": "6–24 Monate",
+        "advanced": "Mehr als 2 Jahre"
+      },
+      "activityLabel": "Alltagsaktivität (ohne Sport)",
+      "activity": {
+        "pal125": "Sitzend, wenig Bewegung (<5.000 Schritte)",
+        "pal140": "Leicht aktiv (5.000–8.000 Schritte)",
+        "pal155": "Aktiv (8.000–12.000 Schritte, stehender Beruf)",
+        "pal175": "Sehr aktiv (>12.000 Schritte, körperliche Arbeit)"
+      }
+    },
+    "goal": {
+      "title": "Dein Ziel",
+      "goalLabel": "Was ist dein Ziel?",
+      "goal": {
+        "lose": "Abnehmen",
+        "gain_muscle": "Muskelaufbau",
+        "gain_weight": "Zunehmen",
+        "strength": "Kraft",
+        "maintain": "Gesundheit/Erhaltung",
+        "recomp": "Recomp"
+      },
+      "rateLabel": "Zieltempo (% Körpergewicht/Woche)",
+      "rateHintRange": "Erlaubter Bereich für dieses Ziel: {min}–{max} %/Woche",
+      "rateHintNone": "Für dieses Ziel gibt es keine Ratenbindung.",
+      "targetWeightLabel": "Zielgewicht (kg, optional)"
+    },
+    "setup": {
+      "title": "Training & Ernährung",
+      "equipmentLabel": "Verfügbares Equipment",
+      "equipment": {
+        "gym": "Fitnessstudio (voll ausgestattet)",
+        "dumbbells": "Kurzhanteln",
+        "barbell": "Langhantel",
+        "bands": "Widerstandsbänder",
+        "pullup_bar": "Klimmzugstange",
+        "kettlebell": "Kettlebell",
+        "bodyweight": "Nur Körpergewicht"
+      },
+      "trainingDaysLabel": "Trainingstage pro Woche",
+      "sessionMinutesLabel": "Minuten pro Einheit",
+      "dietaryPrefsLabel": "Ernährungspräferenzen",
+      "dietaryPrefs": {
+        "omnivore": "Omnivor",
+        "vegetarian": "Vegetarisch",
+        "vegan": "Vegan",
+        "pescetarian": "Pescetarisch",
+        "halal": "Halal",
+        "kosher": "Koscher"
+      },
+      "allergensLabel": "Allergene (EU-Kennzeichnungspflicht)",
+      "allergens": {
+        "gluten": "Gluten",
+        "crustaceans": "Krebstiere",
+        "eggs": "Eier",
+        "fish": "Fisch",
+        "peanuts": "Erdnüsse",
+        "soy": "Soja",
+        "milk": "Milch/Laktose",
+        "nuts": "Schalenfrüchte",
+        "celery": "Sellerie",
+        "mustard": "Senf",
+        "sesame": "Sesam",
+        "sulphites": "Sulfite",
+        "lupin": "Lupinen",
+        "molluscs": "Weichtiere"
+      },
+      "injuriesLabel": "Einschränkungen/Verletzungen",
+      "injuries": {
+        "knee": "Knie",
+        "shoulder": "Schulter",
+        "low_back": "Unterer Rücken",
+        "wrist": "Handgelenk",
+        "hip": "Hüfte"
+      },
+      "healthScreeningTitle": "Kurzer Gesundheits-Check (PAR-Q+)",
+      "healthScreeningHint": "Beeinflusst dein Ergebnis nicht, führt bei Treffern nur zu einem Hinweis.",
+      "heartCondition": "Bekanntes Herzproblem?",
+      "pregnancy": "Schwangerschaft?",
+      "recentInjury": "Akute Verletzung?",
+      "medication": "Regelmäßige Medikamente mit Auswirkung auf Belastbarkeit?"
+    },
+    "result": {
+      "title": "Dein Tagesziel",
+      "kcal": "Kalorien",
+      "protein": "Protein",
+      "fat": "Fett",
+      "carbs": "Kohlenhydrate",
+      "fiber": "Ballaststoffe",
+      "water": "Wasser",
+      "explainToggle": "Wie kam das zustande?",
+      "medicalAdvice": "Deine Angaben legen nahe, vor dem Trainingsstart ärztlichen Rat einzuholen. Das ist kein Ausschlussgrund, nur ein Hinweis."
+    },
+    "errors": {
+      "email_taken": "Diese E-Mail ist bereits registriert.",
+      "invalid_credentials": "E-Mail oder Passwort falsch.",
+      "goal_rate_exceeded": "Das gewählte Tempo liegt außerhalb der medizinisch sicheren Grenze für dieses Ziel.",
+      "under_minimum_age": "Für die App ist ein Mindestalter von 16 Jahren erforderlich.",
+      "target_weight_bmi_too_low": "Das Zielgewicht wäre bei deiner Größe gesundheitlich zu niedrig (BMI < 18,5).",
+      "validation_failed": "Bitte prüfe deine Angaben.",
+      "unknown_error": "Etwas ist schiefgelaufen. Bitte versuch es erneut."
+    }
   }
 }

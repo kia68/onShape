@@ -31,7 +31,7 @@ export function clearToken() {
   window.localStorage.removeItem(TOKEN_STORAGE_KEY);
 }
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+export async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
   const token = getToken();
   const headers = new Headers(init.headers);
   headers.set("Content-Type", "application/json");

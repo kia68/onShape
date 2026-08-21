@@ -1,0 +1,37 @@
+package de.optadata.odil.onshape.nutrition
+
+import de.optadata.odil.onshape.security.currentUserId
+import jakarta.validation.Valid
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.security.core.Authentication
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RestController
+import java.util.UUID
+
+/** FR-26: eigene Rezepte, Naehrwerte pro Portion skaliert aus den Zutaten. */
+@RestController
+@RequestMapping("/api/nutrition/recipes")
+class RecipeController(private val recipeService: RecipeService) {
+
+    @PostMapping
+    fun create(@Valid @RequestBody request: CreateRecipeRequest, authentication: Authentication): ResponseEntity<RecipeResponse> {
+        val result = recipeService.create(
+            authentication.currentUserId(), request.name, request.servings, request.instructions,
+            request.items.map { RecipeItemInput(it.foodId, it.grams) },
+        )
+        return ResponseEntity.status(HttpStatus.CREATED).body(result.toResponse())
+    }
+
+    @GetMapping
+    fun list(authentication: Authentication): List<RecipeResponse> =
+        recipeService.listOwnAndPublic(authentication.currentUserId()).map { it.toResponse() }
+
+    @GetMapping("/{id}")
+    fun get(@PathVariable id: UUID, authentication: Authentication): RecipeResponse =
+        recipeService.get(authentication.currentUserId(), id).toResponse()
+}

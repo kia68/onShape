@@ -142,5 +142,48 @@
       "validation_failed": "Bitte prüfe deine Angaben.",
       "unknown_error": "Etwas ist schiefgelaufen. Bitte versuch es erneut."
     }
+  },
+  "Nutrition": {
+    "title": "Tagebuch",
+    "previousDay": "Vorheriger Tag",
+    "nextDay": "Nächster Tag",
+    "copyYesterday": "Gestern kopieren",
+    "totals": "Tagesübersicht",
+    "kcalOfTarget": "{kcal} von {target} kcal",
+    "kcalNoTarget": "{kcal} kcal",
+    "protein": "Protein",
+    "fat": "Fett",
+    "carbs": "Kohlenhydrate",
+    "slot": {
+      "breakfast": "Frühstück",
+      "lunch": "Mittag",
+      "dinner": "Abend",
+      "snack": "Snacks",
+      "pre_workout": "Vor dem Training",
+      "post_workout": "Nach dem Training"
+    },
+    "emptySlot": "Noch nichts geloggt",
+    "deleteEntry": "Löschen",
+    "addToSlot": "Hinzufügen",
+    "water": {
+      "title": "Wasser",
+      "mlOfTarget": "{ml} von {target} ml",
+      "mlNoTarget": "{ml} ml",
+      "add250": "+250 ml",
+      "add500": "+500 ml"
+    },
+    "search": {
+      "placeholder": "Lebensmittel suchen …",
+      "gramsLabel": "g",
+      "noResults": "Keine Treffer",
+      "logButton": "Loggen"
+    },
+    "offline": {
+      "pending": "{count} Eintrag/Einträge wartet/warten auf Verbindung",
+      "synced": "Synchronisiert"
+    },
+    "errors": {
+      "unknown_error": "Etwas ist schiefgelaufen. Bitte versuch es erneut."
+    }
   }
 }

@@ -4,6 +4,14 @@ Kurzprotokoll: welches Epic/Task erledigt wurde. Quelle der Epics/Tasks: `script
 
 ## 2026-08-21
 
+- **Epic #3 — Ernaehrungstracking — FR-20..FR-32 umgesetzt** (FR-27 Rezept-URL-Import, FR-33 Freitext-Eingabe, FR-34 Etiketten-OCR sind laut KONZEPT.md V1, nicht MVP -- bewusst vertagt, brauchen LLM/OCR-Anbindung analog zum OAuth-Vorgehen bei Epic 2)
+  - Backend (Paket `nutrition`): Volltextsuche (FR-22, GIN-Indizes aus V2), Eintrag loggen/Multi-Select/loeschen/kopieren (FR-20/22/23/24), eigene Meals (FR-25), Rezepte mit Naehrwert-Skalierung pro Portion (FR-26), Mikronaehrstoff-Summierung (FR-28), Wasser-Tracking (FR-29), Koerpermasse (FR-30, erweitert `BodyMeasurementRepository` aus Epic 2), Offline-Sync-Idempotenz ueber `client_id` (FR-31, Unique-Index war in V3 schon vorbereitet), kein Eintragslimit (FR-32, schlicht nicht implementiert).
+  - Neue Tabellen `saved_meals`/`saved_meal_items`/`water_entries` (V10) mit RLS nach demselben Muster wie V8.
+  - Tagesansicht joint Lebensmittel-/Rezeptnamen dazu (`FoodEntryWithName`) statt nur IDs zurueckzugeben -- reine Anzeige-Denormalisierung, die eigentlichen Naehrwerte bleiben unveraendert historisch fixiert.
+  - Frontend: Tagesansicht (`/nutrition`) mit 6 Mahlzeiten-Slots, Quick-Add-Suche mit Multi-Select, Wasser-Widget, Tageskopie. Echter Offline-Queue (`localStorage`, `clientId`-basiert) fuer FR-31 -- im Browser mit simuliertem Netzwerkausfall verifiziert: Eintrag erscheint sofort optimistisch, synct nach Reconnect, bleibt nach Reload persistent ohne Duplikat.
+  - 88 automatisierte Tests (raufgesetzt von 64 aus Epic 2), inkl. RLS-Isolation und Idempotenz-Retry gegen echten Postgres-Testcontainer.
+  - Kein UI fuer eigene Meals/Rezepte (Backend fertig inkl. Tests, aber ohne dedizierte Frontend-Seite) -- bewusste Scope-Entscheidung, um Tagesansicht + Offline-Sync (die spuerbarsten MVP-Features) sauber fertigzustellen statt alles halbfertig anzufassen.
+
 - **Epic #2 — Onboarding & Profil — FR-01..FR-11 umgesetzt** (Backend + Frontend, live end-to-end gegen echten Postgres/Browser verifiziert)
   - Auth (FR-01): Registrierung/Login per E-Mail+Argon2id-Passwort, HS256-JWT (handgerollt statt jjwt, wegen Jackson-3/`tools.jackson`-Versionskonflikt). Google/Apple-OAuth2-Login strukturell vorbereitet (Spring Security `oauth2Login`, nur aktiv wenn `spring.security.oauth2.client.registration.*` gesetzt ist), Passkeys **nicht** umgesetzt (WebAuthn-Ceremony zu sicherheitskritisch fuer diese Session, offener Folgeschritt).
   - RLS-Luecke in V8 gefunden und gefixt: `self_only`-Policy auf `users` blockierte Registrierung und Login-Lookup (Henne-Ei-Problem, `app.current_user_id` ist vor der Authentifizierung zwangslaeufig NULL). Fix ueber neue, eng gefasste Session-Variable `app.auth_lookup` in `V9__users_auth_lookup_policy.sql`, ausschliesslich im Login-/Registrierungs-Codepfad gesetzt.

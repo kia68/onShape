@@ -142,5 +142,48 @@
       "validation_failed": "Please check your input.",
       "unknown_error": "Something went wrong. Please try again."
     }
+  },
+  "Nutrition": {
+    "title": "Diary",
+    "previousDay": "Previous day",
+    "nextDay": "Next day",
+    "copyYesterday": "Copy yesterday",
+    "totals": "Daily summary",
+    "kcalOfTarget": "{kcal} of {target} kcal",
+    "kcalNoTarget": "{kcal} kcal",
+    "protein": "Protein",
+    "fat": "Fat",
+    "carbs": "Carbs",
+    "slot": {
+      "breakfast": "Breakfast",
+      "lunch": "Lunch",
+      "dinner": "Dinner",
+      "snack": "Snacks",
+      "pre_workout": "Pre-workout",
+      "post_workout": "Post-workout"
+    },
+    "emptySlot": "Nothing logged yet",
+    "deleteEntry": "Delete",
+    "addToSlot": "Add",
+    "water": {
+      "title": "Water",
+      "mlOfTarget": "{ml} of {target} ml",
+      "mlNoTarget": "{ml} ml",
+      "add250": "+250 ml",
+      "add500": "+500 ml"
+    },
+    "search": {
+      "placeholder": "Search food …",
+      "gramsLabel": "g",
+      "noResults": "No results",
+      "logButton": "Log"
+    },
+    "offline": {
+      "pending": "{count} entr(y/ies) waiting for connection",
+      "synced": "Synced"
+    },
+    "errors": {
+      "unknown_error": "Something went wrong. Please try again."
+    }
   }
 }

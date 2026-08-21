@@ -4,6 +4,16 @@ Kurzprotokoll: welches Epic/Task erledigt wurde. Quelle der Epics/Tasks: `script
 
 ## 2026-08-21
 
+- **Epic #2 — Onboarding & Profil — FR-01..FR-11 umgesetzt** (Backend + Frontend, live end-to-end gegen echten Postgres/Browser verifiziert)
+  - Auth (FR-01): Registrierung/Login per E-Mail+Argon2id-Passwort, HS256-JWT (handgerollt statt jjwt, wegen Jackson-3/`tools.jackson`-Versionskonflikt). Google/Apple-OAuth2-Login strukturell vorbereitet (Spring Security `oauth2Login`, nur aktiv wenn `spring.security.oauth2.client.registration.*` gesetzt ist), Passkeys **nicht** umgesetzt (WebAuthn-Ceremony zu sicherheitskritisch fuer diese Session, offener Folgeschritt).
+  - RLS-Luecke in V8 gefunden und gefixt: `self_only`-Policy auf `users` blockierte Registrierung und Login-Lookup (Henne-Ei-Problem, `app.current_user_id` ist vor der Authentifizierung zwangslaeufig NULL). Fix ueber neue, eng gefasste Session-Variable `app.auth_lookup` in `V9__users_auth_lookup_policy.sql`, ausschliesslich im Login-/Registrierungs-Codepfad gesetzt.
+  - Profil/Ziel/Equipment/Verfuegbarkeit/Ernaehrungspraeferenzen (FR-02, FR-05, FR-06, FR-09) in einem kombinierten `PUT /api/onboarding/profile`-Aufruf (FR-10: <=90s-Flow).
+  - FR-04 medizinische Ratengrenzen (0,25-1,0 %/Woche Abnehmen, 0,125-0,5 %/Woche Zu-/Aufbau) als harter Block, nicht nur Warnung. FR-07 PAR-Q+-Screening bewusst nicht persistiert (kein Ausschluss, nur Live-Hinweis; vermeidet Speicherung von Gesundheitsdaten ohne geklaerte Rechtsgrundlage, siehe Epic #12).
+  - FR-11 Tagesziel-Berechnung nach KONZEPT.md §7.1/§7.2 (Mifflin-St-Jeor/Katch-McArdle, TDEE, zielabhaengige Kalorienanpassung, Protein/Fett/Kohlenhydrate/Ballaststoffe/Wasser) mit vollstaendiger, aufklappbarer Herleitung (`nutrition_targets.calculation` jsonb) -- Designprinzip "jede Zahl erklaert sich selbst". Harte Sicherheitsgrenzen (Mindestalter 16, Ziel-BMI >= 18,5, Kalorien-Untergrenze BMR×1,1/1200/1500 kcal) aus KONZEPT.md §7.1 umgesetzt.
+  - Frontend: mehrstufiger Onboarding-Wizard unter `frontend/src/app/[locale]/onboarding/` (Konto/Basisdaten/Ziel/Setup), Fortschrittsbalken, "mit Standardwerten fertigstellen" (FR-10), Ergebnis-Screen mit generischer, rekursiver Renderer-Komponente fuer die Herleitung.
+  - Testabdeckung (NFR-13): Unit-Tests fuer Rechenkern (Calculator/GoalRateValidator/SafetyLimits/HealthScreening) mit Referenzwerten, MockMvc-Integrationstests gegen echten Postgres-Testcontainer (Register/Login/Onboarding/RLS-Isolation zwischen zwei Nutzern). 64 Tests, alle gruen.
+  - Manuell im Browser end-to-end verifiziert (Chrome via Claude-in-Chrome): Registrierung -> vierstufiger Wizard -> Tagesziel-Screen, Zahlen decken sich exakt mit der Handrechnung.
+
 - **Epic #1 — Fundament & Infrastruktur — alle 5 Sub-Tasks erledigt**
   - [INFRA-01 (#15) — Repository, CI/CD, Umgebungen](https://github.com/kia68/onShape/issues/15): `.github/workflows/backend-ci.yml` angelegt (Gradle-Build + Tests bei Push/PR auf `master`, JDK 17 Temurin, Testreport-Upload).
   - Stack-Entscheidung Kotlin/Spring Boot: `docs/KONZEPT.md` (§9.1, §10.1, §10.3, §16) und [INFRA-02 (#16)](https://github.com/kia68/onShape/issues/16) an Kotlin/Spring-Boot-Stack angepasst (Flyway/Spring Data JPA statt Drizzle).

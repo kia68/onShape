@@ -10,5 +10,137 @@
     "nutrition": "Nutrition",
     "training": "Training",
     "progress": "Progress"
+  },
+  "Onboarding": {
+    "progressLabel": "Step {step} of {total}",
+    "back": "Back",
+    "next": "Next",
+    "skipWithDefaults": "Finish with default values",
+    "account": {
+      "title": "Create your account",
+      "subtitle": "Sign up with email and password. Apple/Google are coming once connected.",
+      "emailLabel": "Email",
+      "passwordLabel": "Password",
+      "passwordHint": "At least 8 characters",
+      "submit": "Create account",
+      "switchToLogin": "Already have an account? Log in",
+      "switchToRegister": "No account yet? Sign up",
+      "loginTitle": "Log in",
+      "loginSubmit": "Log in"
+    },
+    "basics": {
+      "title": "About you",
+      "sexLabel": "Sex",
+      "sex": { "male": "Male", "female": "Female", "other": "Other", "unspecified": "Prefer not to say" },
+      "birthDateLabel": "Date of birth",
+      "heightLabel": "Height (cm)",
+      "weightLabel": "Weight (kg)",
+      "bodyFatLabel": "Body fat % (optional, for a more precise calculation)",
+      "experienceLabel": "Training experience",
+      "experience": {
+        "none": "Never trained",
+        "beginner": "Less than 6 months",
+        "intermediate": "6-24 months",
+        "advanced": "More than 2 years"
+      },
+      "activityLabel": "Daily activity (excluding sport)",
+      "activity": {
+        "pal125": "Sedentary, little movement (<5,000 steps)",
+        "pal140": "Lightly active (5,000-8,000 steps)",
+        "pal155": "Active (8,000-12,000 steps, standing job)",
+        "pal175": "Very active (>12,000 steps, physical labor)"
+      }
+    },
+    "goal": {
+      "title": "Your goal",
+      "goalLabel": "What's your goal?",
+      "goal": {
+        "lose": "Lose weight",
+        "gain_muscle": "Build muscle",
+        "gain_weight": "Gain weight",
+        "strength": "Strength",
+        "maintain": "Health/maintenance",
+        "recomp": "Recomp"
+      },
+      "rateLabel": "Target rate (% body weight/week)",
+      "rateHintRange": "Allowed range for this goal: {min}-{max} %/week",
+      "rateHintNone": "This goal has no rate limit.",
+      "targetWeightLabel": "Target weight (kg, optional)"
+    },
+    "setup": {
+      "title": "Training & nutrition",
+      "equipmentLabel": "Available equipment",
+      "equipment": {
+        "gym": "Full gym",
+        "dumbbells": "Dumbbells",
+        "barbell": "Barbell",
+        "bands": "Resistance bands",
+        "pullup_bar": "Pull-up bar",
+        "kettlebell": "Kettlebell",
+        "bodyweight": "Bodyweight only"
+      },
+      "trainingDaysLabel": "Training days per week",
+      "sessionMinutesLabel": "Minutes per session",
+      "dietaryPrefsLabel": "Dietary preferences",
+      "dietaryPrefs": {
+        "omnivore": "Omnivore",
+        "vegetarian": "Vegetarian",
+        "vegan": "Vegan",
+        "pescetarian": "Pescetarian",
+        "halal": "Halal",
+        "kosher": "Kosher"
+      },
+      "allergensLabel": "Allergens (EU labelling requirement)",
+      "allergens": {
+        "gluten": "Gluten",
+        "crustaceans": "Crustaceans",
+        "eggs": "Eggs",
+        "fish": "Fish",
+        "peanuts": "Peanuts",
+        "soy": "Soy",
+        "milk": "Milk/lactose",
+        "nuts": "Tree nuts",
+        "celery": "Celery",
+        "mustard": "Mustard",
+        "sesame": "Sesame",
+        "sulphites": "Sulphites",
+        "lupin": "Lupin",
+        "molluscs": "Molluscs"
+      },
+      "injuriesLabel": "Restrictions/injuries",
+      "injuries": {
+        "knee": "Knee",
+        "shoulder": "Shoulder",
+        "low_back": "Lower back",
+        "wrist": "Wrist",
+        "hip": "Hip"
+      },
+      "healthScreeningTitle": "Quick health check (PAR-Q+)",
+      "healthScreeningHint": "Doesn't affect your target, a hit only shows a hint.",
+      "heartCondition": "Known heart condition?",
+      "pregnancy": "Pregnancy?",
+      "recentInjury": "Acute injury?",
+      "medication": "Regular medication affecting exercise capacity?"
+    },
+    "result": {
+      "title": "Your daily target",
+      "kcal": "Calories",
+      "protein": "Protein",
+      "fat": "Fat",
+      "carbs": "Carbs",
+      "fiber": "Fiber",
+      "water": "Water",
+      "explainToggle": "How was this calculated?",
+      "medicalAdvice": "Your answers suggest checking with a doctor before starting training. This is not disqualifying, just a hint."
+    },
+    "errors": {
+      "email_taken": "This email is already registered.",
+      "invalid_credentials": "Email or password is incorrect.",
+      "goal_rate_exceeded": "The chosen rate is outside the medically safe range for this goal.",
+      "under_minimum_age": "A minimum age of 16 is required to use this app.",
+      "target_weight_bmi_too_low": "That target weight would be unhealthily low for your height (BMI < 18.5).",
+      "validation_failed": "Please check your input.",
+      "unknown_error": "Something went wrong. Please try again."
+    }
   }
 }

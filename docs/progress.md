@@ -2,6 +2,18 @@
 
 Kurzprotokoll: welches Epic/Task erledigt wurde. Quelle der Epics/Tasks: `scripts/github_setup.py`, Backlog in [kia68/onShape](https://github.com/kia68/onShape/issues).
 
+## 2026-08-22
+
+- **Epic #4 — Barcode-Scanner & Kaufberatung — FR-40..FR-49 umgesetzt** (FR-46 Preis-pro-Protein ist V2, FR-50/51 Einkaufslisten-/Regal-Vergleichsmodus sind V1 laut KONZEPT.md -- vertagt)
+  - Backend (Paket `barcode`): personalisierter Fit-Score (§7.6) mit fuenf gewichteten Komponenten (Zielpassung, Naehrstoffdichte, Makro-Beitrag, Verarbeitungsgrad, Saettigung) + Malus (Allergen/Praeferenz -> 0, hoher Zuckeranteil, Transfette), Alternativ-Empfehlung (§7.7, Top 3 mit Score-Delta >= 15), manuelles Nacherfassen nicht gefundener Produkte (FR-49).
+  - KONZEPT.md §7.6 ist Prosa, keine Formel wie bei den Onboarding-Algorithmen -- jede Komponente ist explizit dokumentiert interpretiert (analog zu `NutritionTargetCalculator`), inkl. der Stellen, wo Naeherungen noetig waren (Saettigungsindex ohne Wassergehalt-Feld, Naehrstoffdichte-Referenzwerte aus EU-NRV, Zuckerbudget aus WHO-Faustregel abgeleitet, Ernaehrungspraeferenz-Verletzung nur ueber die vorhandenen Allergen-Tags pruefbar, nicht ueber echte Zutatenlisten).
+  - Dabei entdeckt und gefixt: `FoodImportRepository` liess `trans_fat_g` seit Epic #1 (INFRA-03) komplett unter den Tisch fallen (Spalte existiert im Schema, Feld existiert im Domainmodell, aber nie im INSERT/UPDATE gebunden) -- fiel erst auf, weil der Fit-Score-Malus dafuer sonst nie ausgeloest haette. Regressionstest ergaenzt.
+  - Ein Bug im eigenen Fit-Score-Test gefunden: die erste Formel fuer "Makro-Beitrag bei Rueckstand" belohnte einen winzigen Rest-Bedarf (fast erreichtes Ziel) hoeher als einen echten grossen Rueckstand, weil nur der Deckungsgrad der Restmenge gezaehlt wurde, nicht die Groesse des Rueckstands selbst. Testgetrieben gefunden und korrigiert (Bonus = Rueckstandsgroesse MAL Deckungsgrad).
+  - FR-40 Kamera-Scan ueber die native `BarcodeDetector`-API (Chrome/Edge), mit manuellem Fallback fuer nicht unterstuetzte Browser -- der in der Spec genannte `zxing-wasm`-Fallback ist nicht umgesetzt (zusaetzliche WASM-Abhaengigkeit, bewusst ausgelassen). FR-42 lokaler Session-Cache fuer bereits gescannte Barcodes im Frontend.
+  - FR-49 Etikett-Foto + OCR nicht umgesetzt (keine Vision-/OCR-Anbindung vorhanden, gleiches Muster wie OAuth in Epic Onboarding) -- der manuelle Erfassungs-Flow selbst funktioniert.
+  - 114 automatisierte Tests (raufgesetzt von 88 aus Epic Ernaehrungstracking), inkl. Fit-Score-Komponententests mit Referenzwerten (NFR-13) und Integrationstests gegen echten Postgres-Testcontainer (gefundenes/nicht gefundenes Produkt, Allergen-Erkennung, Alternativ-Empfehlung, manuelles Nacherfassen).
+  - Live im Browser verifiziert: Barcode-Eingabe -> Fit-Score-Anzeige mit Ampel-Farbe, NOVA-Badge, uebersetzten Begruendungen, korrekter Alternativ-Empfehlung (Score-Delta 28 zwischen gescanntem und empfohlenem Produkt).
+
 ## 2026-08-21
 
 - **Epic #3 — Ernaehrungstracking — FR-20..FR-32 umgesetzt** (FR-27 Rezept-URL-Import, FR-33 Freitext-Eingabe, FR-34 Etiketten-OCR sind laut KONZEPT.md V1, nicht MVP -- bewusst vertagt, brauchen LLM/OCR-Anbindung analog zum OAuth-Vorgehen bei Epic 2)

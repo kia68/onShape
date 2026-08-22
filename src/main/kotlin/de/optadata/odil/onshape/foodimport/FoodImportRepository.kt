@@ -84,7 +84,7 @@ class FoodImportRepository(
         trust = TrustLevel.entries.first { it.dbValue == getString("trust") },
     )
 
-    private fun ImportedFood.paramCount() = 22
+    private fun ImportedFood.paramCount() = 23
 
     private fun ImportedFood.bindTo(ps: java.sql.PreparedStatement, connection: Connection, trust: TrustLevel) {
         var i = 1
@@ -102,6 +102,7 @@ class FoodImportRepository(
         ps.setDouble(i++, proteinG)
         ps.setDouble(i++, fatG)
         ps.setObject(i++, saturatedFatG)
+        ps.setObject(i++, transFatG)
         ps.setObject(i++, carbsG)
         ps.setObject(i++, sugarG)
         ps.setObject(i++, fiberG)
@@ -127,10 +128,10 @@ class FoodImportRepository(
         const val INSERT_SQL = """
             INSERT INTO foods (
                 source, source_id, trust, barcode, brand, name_de, name_en, category,
-                nova_group, nutriscore, kcal, protein_g, fat_g, saturated_fat_g, carbs_g,
-                sugar_g, fiber_g, salt_g, micros, allergens, additives, is_liquid
+                nova_group, nutriscore, kcal, protein_g, fat_g, saturated_fat_g, trans_fat_g,
+                carbs_g, sugar_g, fiber_g, salt_g, micros, allergens, additives, is_liquid
             ) VALUES (
-                ?::food_source_t, ?, ?::trust_t, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                ?::food_source_t, ?, ?::trust_t, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
             )
         """
 
@@ -139,8 +140,8 @@ class FoodImportRepository(
                 source = ?::food_source_t, source_id = ?, trust = ?::trust_t, barcode = ?,
                 brand = ?, name_de = ?, name_en = ?, category = ?, nova_group = ?,
                 nutriscore = ?, kcal = ?, protein_g = ?, fat_g = ?, saturated_fat_g = ?,
-                carbs_g = ?, sugar_g = ?, fiber_g = ?, salt_g = ?, micros = ?, allergens = ?,
-                additives = ?, is_liquid = ?, updated_at = now()
+                trans_fat_g = ?, carbs_g = ?, sugar_g = ?, fiber_g = ?, salt_g = ?, micros = ?,
+                allergens = ?, additives = ?, is_liquid = ?, updated_at = now()
             WHERE id = ?
         """
     }

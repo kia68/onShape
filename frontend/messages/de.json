@@ -185,5 +185,70 @@
     "errors": {
       "unknown_error": "Etwas ist schiefgelaufen. Bitte versuch es erneut."
     }
+  },
+  "Barcode": {
+    "title": "Barcode scannen",
+    "cameraUnsupported": "Dein Browser unterstützt keinen Kamera-Scan. Gib den Barcode manuell ein.",
+    "cameraPermissionDenied": "Kein Kamerazugriff. Gib den Barcode manuell ein.",
+    "manualLabel": "Barcode manuell eingeben",
+    "manualSubmit": "Suchen",
+    "scanAgain": "Neu scannen",
+    "scanning": "Scanne …",
+    "cachedHint": "Bereits in dieser Sitzung gescannt",
+    "notFound": {
+      "title": "Produkt nicht gefunden",
+      "subtitle": "Barcode {barcode} ist noch nicht in der Datenbank. Leg es an — andere Nutzer profitieren davon.",
+      "addButton": "Produkt anlegen"
+    },
+    "addProduct": {
+      "title": "Produkt anlegen",
+      "nameLabel": "Name",
+      "brandLabel": "Marke (optional)",
+      "kcalLabel": "kcal pro 100g",
+      "proteinLabel": "Protein pro 100g",
+      "fatLabel": "Fett pro 100g",
+      "carbsLabel": "Kohlenhydrate pro 100g",
+      "sugarLabel": "davon Zucker (optional)",
+      "fiberLabel": "Ballaststoffe (optional)",
+      "submit": "Speichern",
+      "ocrNote": "Etikett-Fotoerkennung ist noch nicht verfügbar — bitte die Werte vom Etikett abtippen."
+    },
+    "score": {
+      "outOf100": "{score} / 100",
+      "good": "Passt gut",
+      "medium": "Teils passend",
+      "poor": "Eher nicht für heute"
+    },
+    "allergenWarning": "⚠ Enthält {allergen} — steht in deinem Profil als Allergen.",
+    "dietaryConflict": "⚠ Passt nicht zu deiner Ernährungspräferenz ({preference}).",
+    "reasons": {
+      "fits_energy_goal": "Kaloriendichte passt zu deinem aktuellen Ziel.",
+      "energy_goal_mismatch": "Kaloriendichte passt nicht so gut zu deinem aktuellen Ziel.",
+      "nutrient_dense": "Liefert nennenswert Mikronährstoffe im Verhältnis zu den Kalorien.",
+      "low_nutrient_density": "Liefert wenig Mikronährstoffe im Verhältnis zu den Kalorien.",
+      "nutrient_density_unknown": "Mikronährstoffdaten für dieses Produkt fehlen noch.",
+      "covers_protein_deficit": "{proteinG, number, ::.0} g Protein pro Portion — du liegst heute {remainingProteinG, number, ::.0} g unter deinem Proteinziel.",
+      "low_macro_contribution": "Trägt wenig zu deinem aktuellen Makro-Rückstand bei.",
+      "macro_contribution_unknown": "Noch kein Tagesziel bekannt (Onboarding abschließen für personalisierte Bewertung).",
+      "highly_processed": "Stark verarbeitet (NOVA {novaGroup}).",
+      "minimally_processed": "Gering verarbeitet (NOVA {novaGroup}).",
+      "moderately_processed": "Mäßig verarbeitet (NOVA {novaGroup}).",
+      "processing_unknown": "Verarbeitungsgrad unbekannt.",
+      "high_satiety": "Gut sättigend (viel Protein/Ballaststoffe im Verhältnis zu den Kalorien).",
+      "low_satiety": "Wenig sättigend im Verhältnis zu den Kalorien.",
+      "high_sugar_share": "{sugarG, number, ::.0} g Zucker pro Portion = {pctOfBudget}% deines Tages-Zuckerbudgets.",
+      "trans_fat_present": "Enthält Transfette ({transFatG, number, ::.0} g pro 100g).",
+      "allergen_warning": "Enthält {allergen} — steht in deinem Profil als Allergen.",
+      "dietary_preference_conflict": "Passt nicht zu deiner Präferenz ({preference})."
+    },
+    "alternatives": {
+      "title": "Bessere Alternative",
+      "none": "Das ist eine der besseren Optionen in dieser Kategorie."
+    },
+    "nova": "NOVA {group}",
+    "nutriscore": "Nutri-Score {grade}",
+    "errors": {
+      "unknown_error": "Etwas ist schiefgelaufen. Bitte versuch es erneut."
+    }
   }
 }

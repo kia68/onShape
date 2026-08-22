@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
@@ -16,6 +17,8 @@ import {
   type WorkoutSession,
 } from "@/lib/trainlogApi";
 import { logWorkoutSetWithOfflineFallback, pendingCount, registerOfflineSync } from "@/lib/offlineQueue";
+import { fetchExerciseDetail, type ExerciseDetail } from "@/lib/movementApi";
+import { ExerciseDetailCard } from "../exercises/ExerciseDetailCard";
 
 interface PlannedSlot {
   exerciseId: string;
@@ -86,6 +89,8 @@ export function LiveWorkoutView({ locale }: { locale: string }) {
   const [pending, setPending] = useState(pendingCount());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [introExercise, setIntroExercise] = useState<ExerciseDetail | null>(null);
+  const dismissedIntroIds = useRef<Set<string>>(new Set());
   const wakeLockRef = useRef<{ release: () => Promise<void> } | null>(null);
 
   const load = useCallback(async () => {
@@ -161,6 +166,29 @@ export function LiveWorkoutView({ locale }: { locale: string }) {
     return () => clearTimeout(timer);
   }, [currentSlot]);
 
+  // FR-111: vor der ersten Ausfuehrung einer Uebung im Anfaengermodus wird die Anleitung
+  // automatisch eingeblendet -- nur beim ERSTEN Slot dieser Uebung in diesem Workout geprueft
+  // (die weiteren Saetze derselben Uebung sollen nicht jedes Mal erneut unterbrechen).
+  useEffect(() => {
+    if (!currentSlot) return;
+    const isFirstSlotForExercise = slots.findIndex((s) => s.exerciseId === currentSlot.exerciseId) === currentIndex;
+    if (!isFirstSlotForExercise || dismissedIntroIds.current.has(currentSlot.exerciseId)) return;
+    const timer = setTimeout(() => {
+      fetchExerciseDetail(currentSlot.exerciseId, locale)
+        .then((detail) => {
+          if (detail.showBeginnerIntro) setIntroExercise(detail);
+        })
+        .catch(() => undefined);
+    }, 0);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentSlot, currentIndex]);
+
+  const dismissIntro = () => {
+    if (introExercise) dismissedIntroIds.current.add(introExercise.id);
+    setIntroExercise(null);
+  };
+
   useEffect(() => {
     if (restRemaining == null) return;
     const timer = setTimeout(() => {
@@ -211,6 +239,8 @@ export function LiveWorkoutView({ locale }: { locale: string }) {
 
   const allSetsDone = slots.length > 0 && currentIndex >= slots.length;
 
+  if (introExercise) return <ExerciseDetailCard detail={introExercise} onDismiss={dismissIntro} />;
+
   return (
     <div className="mx-auto flex w-full max-w-md flex-col gap-6 p-6">
       {pending > 0 && (
@@ -243,6 +273,9 @@ export function LiveWorkoutView({ locale }: { locale: string }) {
               {t("setProgress", { current: currentIndex + 1, total: slots.length })}
             </p>
             <h1 className="text-3xl font-bold">{currentSlot.exerciseName}</h1>
+            <Link href={`/${locale}/training/exercises/${currentSlot.exerciseId}`} className="text-xs text-primary underline">
+              {t("viewInstructions")}
+            </Link>
             <p className="text-sm text-muted-foreground">
               {currentSlot.durationMinutes != null
                 ? t("targetDuration", { minutes: currentSlot.durationMinutes })

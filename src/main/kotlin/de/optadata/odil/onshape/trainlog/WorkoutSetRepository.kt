@@ -49,6 +49,23 @@ class WorkoutSetRepository(private val jdbcTemplate: JdbcTemplate) {
     fun findBySession(sessionId: UUID): List<WorkoutSet> =
         jdbcTemplate.query("$SELECT_SQL WHERE session_id = ? ORDER BY logged_at", rowMapper, sessionId)
 
+    /** FR-111: ob dieser Nutzer diese Uebung jemals (in irgendeiner Session) abgeschlossen hat --
+     * unabhaengig vom Gewichtsfeld, damit auch reine Koerpergewichtsuebungen (kein `weight_kg`)
+     * korrekt als "schon gesehen" zaehlen (anders als [PersonalRecordDetector], das nur
+     * gewichtete Saetze betrachtet). */
+    fun hasEverLogged(userId: UUID, exerciseId: UUID): Boolean =
+        jdbcTemplate.queryForObject(
+            """
+            SELECT EXISTS (
+                SELECT 1 FROM workout_sets ws
+                JOIN workout_sessions s ON s.id = ws.session_id
+                WHERE s.user_id = ? AND ws.exercise_id = ? AND ws.completed AND NOT ws.is_warmup
+            )
+            """.trimIndent(),
+            Boolean::class.java,
+            userId, exerciseId,
+        ) ?: false
+
     /** FR-91: letzter abgeschlossener Arbeitssatz fuer diese Uebung, aus einer FRUEHEREN Session
      * (nicht der laufenden) -- "aus der letzten Einheit". */
     fun findLastWorkingSet(userId: UUID, exerciseId: UUID, excludeSessionId: UUID): WorkoutSet? =

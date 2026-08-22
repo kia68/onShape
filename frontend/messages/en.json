@@ -259,8 +259,35 @@
       "EST_1RM": "estimated 1RM",
       "VOLUME": "Volume"
     },
+    "viewInstructions": "View instructions",
     "errors": {
       "noSession": "No active workout. Start one from your plan.",
+      "unknown_error": "Something went wrong. Please try again."
+    }
+  },
+  "Movement": {
+    "targetMuscles": "Target muscles",
+    "videoPlaceholder": "Video coming soon",
+    "noContent": "Detailed instructions for this exercise are coming soon.",
+    "setup": "Setup",
+    "execution": "Execution",
+    "cues": "Cues",
+    "breathing": "Breathing",
+    "tempo": "Tempo",
+    "commonMistakes": "Common mistakes",
+    "why": "Why",
+    "fix": "Fix",
+    "whatIsNormal": "What's normal?",
+    "startingWeightTitle": "Starting weight recommendation",
+    "startingWeightValue": "{weight} kg",
+    "startingWeightReason": {
+      "bodyweight_only": "No extra load needed -- bodyweight only.",
+      "no_recommendation": "No recommendation available for this equipment."
+    },
+    "easier": "Easier",
+    "harder": "Harder",
+    "dismissIntro": "Got it, continue",
+    "errors": {
       "unknown_error": "Something went wrong. Please try again."
     }
   },

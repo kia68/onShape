@@ -259,8 +259,35 @@
       "EST_1RM": "geschätztes 1RM",
       "VOLUME": "Volumen"
     },
+    "viewInstructions": "Anleitung ansehen",
     "errors": {
       "noSession": "Kein laufendes Workout. Starte eines von deinem Plan aus.",
+      "unknown_error": "Etwas ist schiefgelaufen. Bitte versuch es erneut."
+    }
+  },
+  "Movement": {
+    "targetMuscles": "Zielmuskulatur",
+    "videoPlaceholder": "Video folgt noch",
+    "noContent": "Detailanleitung fuer diese Uebung folgt noch.",
+    "setup": "Aufbau",
+    "execution": "Ausfuehrung",
+    "cues": "Cues",
+    "breathing": "Atmung",
+    "tempo": "Tempo",
+    "commonMistakes": "Haeufige Fehler",
+    "why": "Warum",
+    "fix": "Korrektur",
+    "whatIsNormal": "Was ist normal?",
+    "startingWeightTitle": "Startgewicht-Empfehlung",
+    "startingWeightValue": "{weight} kg",
+    "startingWeightReason": {
+      "bodyweight_only": "Keine Zusatzlast noetig -- nur Koerpergewicht.",
+      "no_recommendation": "Keine Empfehlung fuer dieses Equipment verfuegbar."
+    },
+    "easier": "Einfacher",
+    "harder": "Schwerer",
+    "dismissIntro": "Verstanden, weiter",
+    "errors": {
       "unknown_error": "Etwas ist schiefgelaufen. Bitte versuch es erneut."
     }
   },

@@ -1,0 +1,299 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/button";
+import { ApiError } from "@/lib/api";
+import { fetchActiveProgram, type ProgramDay } from "@/lib/trainingApi";
+import {
+  fetchActiveSession,
+  fetchPrefill,
+  finishSession,
+  startSession,
+  type PersonalRecord,
+  type PrefillSuggestion,
+  type WorkoutSession,
+} from "@/lib/trainlogApi";
+import { logWorkoutSetWithOfflineFallback, pendingCount, registerOfflineSync } from "@/lib/offlineQueue";
+
+interface PlannedSlot {
+  exerciseId: string;
+  exerciseName: string;
+  slotIndexForExercise: number;
+  repMin: number | null;
+  repMax: number | null;
+  targetRir: number | null;
+  restSeconds: number;
+  durationMinutes: number | null;
+}
+
+function buildPlannedSlots(day: ProgramDay): PlannedSlot[] {
+  const slots: PlannedSlot[] = [];
+  for (const item of day.items) {
+    for (let i = 0; i < item.sets; i++) {
+      slots.push({
+        exerciseId: item.exerciseId,
+        exerciseName: item.exerciseName,
+        slotIndexForExercise: i,
+        repMin: item.repMin,
+        repMax: item.repMax,
+        targetRir: item.targetRir,
+        restSeconds: item.restSeconds,
+        durationMinutes: item.durationMinutes,
+      });
+    }
+  }
+  return slots;
+}
+
+function requestWakeLock(): Promise<{ release: () => Promise<void> } | null> {
+  if (typeof navigator === "undefined" || !("wakeLock" in navigator)) return Promise.resolve(null);
+  return navigator.wakeLock.request("screen").catch(() => null);
+}
+
+function playRestEndSound() {
+  try {
+    const AudioContextClass = window.AudioContext ?? (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const ctx = new AudioContextClass();
+    const oscillator = ctx.createOscillator();
+    oscillator.frequency.value = 880;
+    oscillator.connect(ctx.destination);
+    oscillator.start();
+    oscillator.stop(ctx.currentTime + 0.3);
+  } catch {
+    // Audio nicht verfuegbar (z.B. Autoplay-Policy) -- Vibration bleibt als Fallback.
+  }
+  if (typeof navigator !== "undefined" && "vibrate" in navigator) navigator.vibrate(300);
+}
+
+export function LiveWorkoutView({ locale }: { locale: string }) {
+  const t = useTranslations("TrainingLog");
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const programDayIdParam = searchParams.get("programDayId");
+
+  const [session, setSession] = useState<WorkoutSession | null>(null);
+  const [day, setDay] = useState<ProgramDay | null>(null);
+  const [slots, setSlots] = useState<PlannedSlot[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [prefill, setPrefill] = useState<PrefillSuggestion | null>(null);
+  const [weightInput, setWeightInput] = useState("");
+  const [repsInput, setRepsInput] = useState("");
+  const [rirInput, setRirInput] = useState("");
+  const [restRemaining, setRestRemaining] = useState<number | null>(null);
+  const [celebration, setCelebration] = useState<PersonalRecord[] | null>(null);
+  const [pending, setPending] = useState(pendingCount());
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const wakeLockRef = useRef<{ release: () => Promise<void> } | null>(null);
+
+  const load = useCallback(async () => {
+    try {
+      let active: WorkoutSession;
+      try {
+        active = await fetchActiveSession();
+      } catch (e) {
+        // "Keine aktive Session" ist der Normalfall bei einem neuen Workout -- der Server
+        // antwortet dafuer mit einem leeren 404-Body, den ein 401 nicht von unterscheidet, wenn
+        // die einzige Absicherung `e.status === 404` waere. Ein echter Auth-Fehler faellt hier
+        // trotzdem sauber durch: der nachfolgende startSession()-Aufruf scheitert dann ebenso.
+        if (e instanceof ApiError && (e.status === 404 || e.status === 401) && programDayIdParam) {
+          active = await startSession(programDayIdParam);
+        } else {
+          throw e;
+        }
+      }
+      setSession(active);
+
+      const activeProgram = await fetchActiveProgram();
+      const targetDayId = active.programDayId ?? programDayIdParam;
+      const foundDay = activeProgram.days.find((d) => d.id === targetDayId) ?? null;
+      setDay(foundDay);
+      setSlots(foundDay ? buildPlannedSlots(foundDay) : []);
+      setError(null);
+    } catch {
+      setError(t("errors.unknown_error"));
+    } finally {
+      setLoading(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [t]);
+
+  useEffect(() => {
+    const timer = setTimeout(load, 0);
+    return () => clearTimeout(timer);
+  }, [load]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      requestWakeLock().then((lock) => {
+        wakeLockRef.current = lock;
+      });
+    }, 0);
+    return () => {
+      clearTimeout(timer);
+      wakeLockRef.current?.release();
+    };
+  }, []);
+
+  useEffect(() => {
+    registerOfflineSync(() => setPending(pendingCount()));
+  }, []);
+
+  const currentSlot = slots[currentIndex] ?? null;
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!currentSlot) {
+        setPrefill(null);
+        return;
+      }
+      fetchPrefill(currentSlot.exerciseId, currentSlot.repMax ?? undefined, currentSlot.targetRir ?? undefined)
+        .then((result) => {
+          setPrefill(result);
+          setWeightInput(result.suggestedWeightKg != null ? String(result.suggestedWeightKg) : "");
+          setRepsInput(result.suggestedReps != null ? String(result.suggestedReps) : "");
+          setRirInput("");
+        })
+        .catch(() => setPrefill(null));
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [currentSlot]);
+
+  useEffect(() => {
+    if (restRemaining == null) return;
+    const timer = setTimeout(() => {
+      if (restRemaining <= 0) {
+        playRestEndSound();
+        setRestRemaining(null);
+        return;
+      }
+      setRestRemaining((r) => (r != null ? r - 1 : null));
+    }, restRemaining <= 0 ? 0 : 1000);
+    return () => clearTimeout(timer);
+  }, [restRemaining]);
+
+  const handleLogSet = async () => {
+    if (!session || !currentSlot) return;
+    setCelebration(null);
+    const result = await logWorkoutSetWithOfflineFallback(session.id, {
+      exerciseId: currentSlot.exerciseId,
+      setIndex: currentSlot.slotIndexForExercise,
+      weightKg: weightInput ? Number(weightInput) : undefined,
+      reps: repsInput ? Number(repsInput) : undefined,
+      rir: rirInput ? Number(rirInput) : undefined,
+      isWarmup: false,
+      completed: true,
+    });
+    setPending(pendingCount());
+    if (result.result?.personalRecords.length) setCelebration(result.result.personalRecords);
+    if (currentSlot.restSeconds > 0 && currentIndex < slots.length - 1) setRestRemaining(currentSlot.restSeconds);
+    setCurrentIndex((i) => i + 1);
+  };
+
+  const handleFinish = async () => {
+    if (!session) return;
+    await finishSession(session.id);
+    wakeLockRef.current?.release();
+    router.push(`/${locale}/training`);
+  };
+
+  if (loading) return <div className="p-6 text-sm text-muted-foreground">…</div>;
+  if (error || !session) {
+    return (
+      <div className="mx-auto max-w-md p-6">
+        <p className="text-sm text-destructive">{error ?? t("errors.noSession")}</p>
+        <Button className="mt-4" onClick={() => router.push(`/${locale}/training`)}>{t("backToPlan")}</Button>
+      </div>
+    );
+  }
+
+  const allSetsDone = slots.length > 0 && currentIndex >= slots.length;
+
+  return (
+    <div className="mx-auto flex w-full max-w-md flex-col gap-6 p-6">
+      {pending > 0 && (
+        <p className="rounded-md border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-xs">{t("offlinePending", { count: pending })}</p>
+      )}
+
+      {celebration && celebration.length > 0 && (
+        <div className="rounded-md border border-emerald-500/50 bg-emerald-500/10 px-3 py-2 text-sm">
+          🎉 {t("newRecord")}: {celebration.map((r) => t(`recordType.${r.type}`)).join(", ")}
+        </div>
+      )}
+
+      {restRemaining != null && (
+        <div className="rounded-md border border-primary/50 bg-primary/10 px-3 py-4 text-center">
+          <p className="text-xs text-muted-foreground">{t("restTimer")}</p>
+          <p className="text-3xl font-semibold">{restRemaining}s</p>
+        </div>
+      )}
+
+      {allSetsDone || !currentSlot ? (
+        <div className="flex flex-col gap-4 text-center">
+          <h1 className="text-2xl font-semibold">{t("workoutDone")}</h1>
+          <p className="text-sm text-muted-foreground">{day?.name}</p>
+          <Button onClick={handleFinish}>{t("finishWorkout")}</Button>
+        </div>
+      ) : (
+        <>
+          <div className="text-center">
+            <p className="text-xs text-muted-foreground">
+              {t("setProgress", { current: currentIndex + 1, total: slots.length })}
+            </p>
+            <h1 className="text-3xl font-bold">{currentSlot.exerciseName}</h1>
+            <p className="text-sm text-muted-foreground">
+              {currentSlot.durationMinutes != null
+                ? t("targetDuration", { minutes: currentSlot.durationMinutes })
+                : t("targetReps", { min: currentSlot.repMin ?? 0, max: currentSlot.repMax ?? 0 })}
+              {currentSlot.targetRir != null && ` · RIR ${currentSlot.targetRir}`}
+            </p>
+          </div>
+
+          {prefill?.lastWeightKg != null && (
+            <p className="text-center text-xs text-muted-foreground">
+              {t("lastTime", { weight: prefill.lastWeightKg, reps: prefill.lastReps ?? "–" })}
+            </p>
+          )}
+
+          <div className="flex gap-3">
+            <label className="flex flex-1 flex-col gap-1 text-sm">
+              <span className="font-medium">{t("weightLabel")}</span>
+              <input
+                type="number"
+                inputMode="decimal"
+                value={weightInput}
+                onChange={(e) => setWeightInput(e.target.value)}
+                className="h-12 rounded-md border border-input bg-background px-3 text-center text-lg outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              />
+            </label>
+            <label className="flex flex-1 flex-col gap-1 text-sm">
+              <span className="font-medium">{t("repsLabel")}</span>
+              <input
+                type="number"
+                inputMode="numeric"
+                value={repsInput}
+                onChange={(e) => setRepsInput(e.target.value)}
+                className="h-12 rounded-md border border-input bg-background px-3 text-center text-lg outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              />
+            </label>
+            <label className="flex w-20 flex-col gap-1 text-sm">
+              <span className="font-medium">RIR</span>
+              <input
+                type="number"
+                inputMode="numeric"
+                value={rirInput}
+                onChange={(e) => setRirInput(e.target.value)}
+                className="h-12 rounded-md border border-input bg-background px-2 text-center text-lg outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              />
+            </label>
+          </div>
+
+          <Button size="lg" onClick={handleLogSet}>{t("logSet")}</Button>
+          <Button variant="outline" size="sm" onClick={handleFinish}>{t("finishWorkout")}</Button>
+        </>
+      )}
+    </div>
+  );
+}

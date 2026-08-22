@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { ApiError } from "@/lib/api";
@@ -22,8 +23,9 @@ function itemLabel(item: ProgramItem): string {
   return `${item.sets} × ${item.repMin}–${item.repMax}`;
 }
 
-export function TrainingPlanView() {
+export function TrainingPlanView({ locale }: { locale: string }) {
   const t = useTranslations("Training");
+  const router = useRouter();
 
   const [program, setProgram] = useState<Program | null>(null);
   const [volume, setVolume] = useState<VolumeDashboard | null>(null);
@@ -163,7 +165,12 @@ export function TrainingPlanView() {
 
       {days.map((day) => (
         <div key={day.id} className="rounded-md border border-input p-4">
-          <h3 className="mb-2 font-semibold">{day.name}</h3>
+          <div className="mb-2 flex items-center justify-between">
+            <h3 className="font-semibold">{day.name}</h3>
+            <Button size="sm" onClick={() => router.push(`/${locale}/training/log?programDayId=${day.id}`)}>
+              {t("startWorkout")}
+            </Button>
+          </div>
           <ul className="flex flex-col gap-2">
             {day.items.map((item) => (
               <li key={item.id} className="flex items-center justify-between gap-2 text-sm">

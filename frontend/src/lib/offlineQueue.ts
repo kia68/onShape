@@ -6,12 +6,14 @@
 
 import { ApiError } from "./api";
 import { logEntry, logWater, type LogEntryRequest } from "./nutritionApi";
+import { logSet, type LogSetRequest } from "./trainlogApi";
 
 const QUEUE_STORAGE_KEY = "onshape.offlineQueue";
 
 type QueuedAction =
   | { kind: "food"; clientId: string; payload: LogEntryRequest }
-  | { kind: "water"; clientId: string; payload: { loggedDate: string; amountMl: number } };
+  | { kind: "water"; clientId: string; payload: { loggedDate: string; amountMl: number } }
+  | { kind: "workoutSet"; clientId: string; payload: { sessionId: string; entry: LogSetRequest } };
 
 function readQueue(): QueuedAction[] {
   if (typeof window === "undefined") return [];
@@ -70,6 +72,26 @@ export async function logWaterWithOfflineFallback(loggedDate: string, amountMl: 
   }
 }
 
+/** FR-96: Satzweises Offline-Logging waehrend eines laufenden Workouts, gleiches Idempotenz-
+ * Muster wie Essen/Wasser (clientId, siehe V13__workout_sets_offline_sync.sql). */
+export async function logWorkoutSetWithOfflineFallback(
+  sessionId: string,
+  entry: Omit<LogSetRequest, "clientId">,
+): Promise<{ queued: boolean; clientId: string; result?: Awaited<ReturnType<typeof logSet>> }> {
+  const clientId = newClientId();
+  const payload = { ...entry, clientId };
+  try {
+    const result = await logSet(sessionId, payload);
+    return { queued: false, clientId, result };
+  } catch (error) {
+    if (!isNetworkFailure(error)) throw error;
+    const queue = readQueue();
+    queue.push({ kind: "workoutSet", clientId, payload: { sessionId, entry: payload } });
+    writeQueue(queue);
+    return { queued: true, clientId };
+  }
+}
+
 /** Versucht alle wartenden Eintraege zu senden. Bleibt ein Eintrag wegen (weiterhin)
  * fehlender Verbindung fehlgeschlagen, bricht der Flush ab und laesst den Rest der Queue
  * unangetastet -- die naechste Gelegenheit (naechstes `online`-Event) versucht es erneut. */
@@ -82,8 +104,10 @@ export async function flushOfflineQueue(): Promise<{ synced: number; remaining: 
     try {
       if (action.kind === "food") {
         await logEntry(action.payload);
-      } else {
+      } else if (action.kind === "water") {
         await logWater(action.payload.loggedDate, action.payload.amountMl, action.clientId);
+      } else {
+        await logSet(action.payload.sessionId, action.payload.entry);
       }
       synced++;
     } catch (error) {

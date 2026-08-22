@@ -185,5 +185,70 @@
     "errors": {
       "unknown_error": "Something went wrong. Please try again."
     }
+  },
+  "Barcode": {
+    "title": "Scan barcode",
+    "cameraUnsupported": "Your browser doesn't support camera scanning. Enter the barcode manually.",
+    "cameraPermissionDenied": "No camera access. Enter the barcode manually.",
+    "manualLabel": "Enter barcode manually",
+    "manualSubmit": "Search",
+    "scanAgain": "Scan again",
+    "scanning": "Scanning …",
+    "cachedHint": "Already scanned this session",
+    "notFound": {
+      "title": "Product not found",
+      "subtitle": "Barcode {barcode} isn't in the database yet. Add it — other users benefit too.",
+      "addButton": "Add product"
+    },
+    "addProduct": {
+      "title": "Add product",
+      "nameLabel": "Name",
+      "brandLabel": "Brand (optional)",
+      "kcalLabel": "kcal per 100g",
+      "proteinLabel": "Protein per 100g",
+      "fatLabel": "Fat per 100g",
+      "carbsLabel": "Carbs per 100g",
+      "sugarLabel": "of which sugar (optional)",
+      "fiberLabel": "Fiber (optional)",
+      "submit": "Save",
+      "ocrNote": "Label photo recognition isn't available yet — please type the values from the label."
+    },
+    "score": {
+      "outOf100": "{score} / 100",
+      "good": "Fits well",
+      "medium": "Partially fits",
+      "poor": "Not great for today"
+    },
+    "allergenWarning": "⚠ Contains {allergen} — listed as an allergen in your profile.",
+    "dietaryConflict": "⚠ Doesn't fit your dietary preference ({preference}).",
+    "reasons": {
+      "fits_energy_goal": "Calorie density fits your current goal.",
+      "energy_goal_mismatch": "Calorie density doesn't fit your current goal that well.",
+      "nutrient_dense": "Provides notable micronutrients relative to its calories.",
+      "low_nutrient_density": "Provides few micronutrients relative to its calories.",
+      "nutrient_density_unknown": "Micronutrient data for this product is missing.",
+      "covers_protein_deficit": "{proteinG, number, ::.0} g protein per serving — you're {remainingProteinG, number, ::.0} g under your protein target today.",
+      "low_macro_contribution": "Contributes little to your current macro shortfall.",
+      "macro_contribution_unknown": "No daily target known yet (finish onboarding for a personalized score).",
+      "highly_processed": "Highly processed (NOVA {novaGroup}).",
+      "minimally_processed": "Minimally processed (NOVA {novaGroup}).",
+      "moderately_processed": "Moderately processed (NOVA {novaGroup}).",
+      "processing_unknown": "Processing level unknown.",
+      "high_satiety": "Filling (high protein/fiber relative to calories).",
+      "low_satiety": "Not very filling relative to its calories.",
+      "high_sugar_share": "{sugarG, number, ::.0} g sugar per serving = {pctOfBudget}% of your daily sugar budget.",
+      "trans_fat_present": "Contains trans fats ({transFatG, number, ::.0} g per 100g).",
+      "allergen_warning": "Contains {allergen} — listed as an allergen in your profile.",
+      "dietary_preference_conflict": "Doesn't fit your preference ({preference})."
+    },
+    "alternatives": {
+      "title": "Better alternative",
+      "none": "This is one of the better options in this category."
+    },
+    "nova": "NOVA {group}",
+    "nutriscore": "Nutri-Score {grade}",
+    "errors": {
+      "unknown_error": "Something went wrong. Please try again."
+    }
   }
 }

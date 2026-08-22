@@ -4,6 +4,7 @@ import de.optadata.odil.onshape.AbstractIntegrationTest
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.transaction.annotation.Transactional
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
@@ -19,6 +20,9 @@ class FoodImportServiceIntegrationTest : AbstractIntegrationTest() {
 
     @Autowired
     lateinit var repository: FoodImportRepository
+
+    @Autowired
+    lateinit var jdbcTemplate: JdbcTemplate
 
     private fun food(sourceId: String, barcode: String? = null, nameDe: String = "Testprodukt $sourceId") =
         ImportedFood(
@@ -57,6 +61,19 @@ class FoodImportServiceIntegrationTest : AbstractIntegrationTest() {
             food(sourceId = "off-int-2", barcode = "4222222222222", nameDe = "Testprodukt aktualisiert"),
         )
         assertIs<DedupDecision.UpdateExisting>(second)
+    }
+
+    @Test
+    fun `trans fat is actually persisted (regression -- INSERT_SQL used to silently drop it)`() {
+        val decision = service.importOne(food(sourceId = "off-int-4", barcode = "4444444444444").copy(transFatG = 0.7))
+        assertIs<DedupDecision.InsertNew>(decision)
+
+        val transFatG = jdbcTemplate.queryForObject(
+            "SELECT trans_fat_g FROM foods WHERE barcode = ?",
+            java.math.BigDecimal::class.java,
+            "4444444444444",
+        )
+        assertEquals(0, java.math.BigDecimal("0.7").compareTo(transFatG))
     }
 
     @Test

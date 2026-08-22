@@ -5,6 +5,8 @@ import org.springframework.stereotype.Repository
 import java.sql.ResultSet
 import java.util.UUID
 
+data class ExerciseCatalogEntry(val id: UUID, val slug: String, val nameDe: String, val nameEn: String)
+
 /** `exercises`/`exercise_muscles` tragen keine RLS (oeffentliche Referenzdaten, wie `foods`).
  * Muskelbeteiligungen werden in einem zweiten Query batch-geladen statt per Uebung einzeln. */
 @Repository
@@ -21,6 +23,15 @@ class ExerciseRepository(private val jdbcTemplate: JdbcTemplate) {
         val header = jdbcTemplate.query("$HEADER_SQL WHERE id = ?", { rs, _ -> rs.toHeader() }, id).firstOrNull() ?: return null
         return header.toExercise(findMuscles(listOf(id))[id] ?: emptyList())
     }
+
+    /** FR-153: schlanke Projektion fuer den Import-Uebungsabgleich ([de.optadata.odil.onshape.integrations.ExerciseMatcher]) --
+     * [Exercise] traegt nur `name_de` (siehe [toHeader]), importierte Dateien (Hevy/Strong) liefern
+     * aber englische Namen, daher hier zusaetzlich `name_en`. */
+    fun findCatalogForMatching(): List<ExerciseCatalogEntry> =
+        jdbcTemplate.query(
+            "SELECT id, slug, name_de, name_en FROM exercises",
+            { rs, _ -> ExerciseCatalogEntry(rs.getObject("id", UUID::class.java), rs.getString("slug"), rs.getString("name_de"), rs.getString("name_en")) },
+        )
 
     private fun findMuscles(exerciseIds: List<UUID>): Map<UUID, List<ExerciseMuscleFactor>> {
         val placeholders = exerciseIds.joinToString(",") { "?" }

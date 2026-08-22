@@ -322,6 +322,38 @@
       "unknown_error": "Etwas ist schiefgelaufen. Bitte versuch es erneut."
     }
   },
+  "Import": {
+    "title": "Trainingsdaten importieren",
+    "intro": "Bring deine Trainingshistorie aus einer anderen App mit. Unterstuetzt werden Hevy- und Strong-CSV-Exporte.",
+    "hevy": {
+      "title": "Hevy",
+      "hint": "Hevy-App -> Profil -> Export & Import Data -> Export Workouts",
+      "submit": "Hevy-CSV importieren"
+    },
+    "strong": {
+      "title": "Strong",
+      "hint": "Strong-App -> Settings -> Export Data",
+      "submit": "Strong-CSV importieren"
+    },
+    "fileLabel": "CSV-Datei auswaehlen",
+    "importing": "Importiere …",
+    "result": {
+      "title": "Import abgeschlossen",
+      "sessions": "{count} Trainingseinheit(en) importiert",
+      "sets": "{count} Satz/Saetze importiert",
+      "unmatchedTitle": "Nicht zugeordnete Uebungen (uebersprungen):",
+      "warningsTitle": "Hinweise:"
+    },
+    "errors": {
+      "unknown_error": "Import fehlgeschlagen. Bitte pruefe die Datei und versuch es erneut."
+    },
+    "unsupported": {
+      "title": "Nicht unterstuetzte Quellen",
+      "myfitnesspal": "MyFitnessPal: das offizielle CSV-Format konnte nicht zuverlaessig verifiziert werden -- daher (noch) nicht unterstuetzt.",
+      "yazio": "Yazio: bietet offiziell keinen CSV-Export an (nur PDF bzw. DSGVO-Auskunftsersuchen) -- daher nicht unterstuetzt.",
+      "wearables": "Apple Health, Google Fit, Garmin, Fitbit, Withings, Polar und Strava erfordern eine OAuth-Anbindung bzw. native App-Zugriffe und sind fuer eine spaetere Version geplant."
+    }
+  },
   "Barcode": {
     "title": "Barcode scannen",
     "cameraUnsupported": "Dein Browser unterstützt keinen Kamera-Scan. Gib den Barcode manuell ein.",

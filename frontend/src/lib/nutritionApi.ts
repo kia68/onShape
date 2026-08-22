@@ -19,6 +19,7 @@ export interface FoodSearchResult {
   proteinGPer100g: number;
   fatGPer100g: number;
   carbsGPer100g: number;
+  source: "bls" | "usda" | "off" | "brand_verified" | "user" | "ai_estimate";
   trust: "verified" | "community" | "estimated";
   servings: ServingOption[];
   lastUsedGrams: number | null;

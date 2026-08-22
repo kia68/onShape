@@ -176,7 +176,20 @@
       "placeholder": "Lebensmittel suchen …",
       "gramsLabel": "g",
       "noResults": "Keine Treffer",
-      "logButton": "Loggen"
+      "logButton": "Loggen",
+      "trust": {
+        "verified": "Verifiziert",
+        "community": "Community",
+        "estimated": "Geschaetzt"
+      },
+      "source": {
+        "bls": "BLS 4.0",
+        "usda": "USDA",
+        "off": "Open Food Facts",
+        "brand_verified": "Hersteller",
+        "user": "Nutzer-Eintrag",
+        "ai_estimate": "KI-Schaetzung"
+      }
     },
     "offline": {
       "pending": "{count} Eintrag/Einträge wartet/warten auf Verbindung",
@@ -232,6 +245,11 @@
         "abs": "Bauch",
         "obliques": "Seitliche Bauchmuskeln",
         "calves": "Waden"
+      },
+      "status": {
+        "UNDER": "Unter Korridor",
+        "IN_RANGE": "Im Korridor",
+        "OVER": "Ueber Korridor"
       }
     },
     "errors": {
@@ -308,7 +326,12 @@
     },
     "volume": {
       "title": "Trainingsvolumen pro Muskelgruppe",
-      "empty": "Noch keine geloggten Saetze in diesem Zeitraum."
+      "empty": "Noch keine geloggten Saetze in diesem Zeitraum.",
+      "status": {
+        "under": "Unter Korridor",
+        "in_range": "Im Korridor",
+        "over": "Ueber Korridor"
+      }
     },
     "strength": {
       "title": "Kraftverlauf (geschaetztes 1RM)",

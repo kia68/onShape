@@ -27,6 +27,8 @@ class SecurityConfig(
     private val oAuth2SuccessHandler: OAuth2SuccessHandler,
     private val clientRegistrationRepository: ObjectProvider<ClientRegistrationRepository>,
     @Value("\${app.cors.allowed-origins:http://localhost:3000}") private val allowedOrigins: List<String>,
+    @Value("\${app.security.auth-rate-limit.max-requests:30}") private val authRateLimitMaxRequests: Int,
+    @Value("\${app.security.auth-rate-limit.window-seconds:60}") private val authRateLimitWindowSeconds: Long,
 ) {
 
     @Bean
@@ -41,6 +43,10 @@ class SecurityConfig(
                     .requestMatchers("/api/auth/**", "/actuator/health").permitAll()
                     .anyRequest().authenticated()
             }
+            .addFilterBefore(
+                AuthRateLimitFilter(RateLimiter(authRateLimitMaxRequests, authRateLimitWindowSeconds)),
+                UsernamePasswordAuthenticationFilter::class.java,
+            )
             .addFilterBefore(JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter::class.java)
 
         if (clientRegistrationRepository.ifAvailable != null) {

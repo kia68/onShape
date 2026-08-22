@@ -219,7 +219,7 @@ export function TrainingPlanView({ locale }: { locale: string }) {
                         : "text-destructive"
                   }
                 >
-                  {entry.plannedSets.toFixed(1)} / {entry.corridorMin}–{entry.corridorMax}
+                  {entry.plannedSets.toFixed(1)} / {entry.corridorMin}–{entry.corridorMax} · {t(`volume.status.${entry.status}`)}
                 </span>
               </li>
             ))}

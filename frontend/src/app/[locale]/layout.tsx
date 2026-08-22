@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { notFound } from "next/navigation";
 import { Geist, Geist_Mono } from "next/font/google";
 import { routing } from "@/i18n/routing";
+import { ServiceWorkerRegistration } from "../ServiceWorkerRegistration";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -29,8 +30,14 @@ export function generateMetadata(): Metadata {
         routing.locales.map((locale) => [locale, `/${locale}`]),
       ),
     },
+    // NFR-07: PWA-Installierbarkeit.
+    manifest: "/manifest.webmanifest",
   };
 }
+
+export const viewport: Viewport = {
+  themeColor: "#0f172a",
+};
 
 export default async function LocaleLayout({
   children,
@@ -47,6 +54,7 @@ export default async function LocaleLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
+        <ServiceWorkerRegistration />
         <NextIntlClientProvider>{children}</NextIntlClientProvider>
       </body>
     </html>

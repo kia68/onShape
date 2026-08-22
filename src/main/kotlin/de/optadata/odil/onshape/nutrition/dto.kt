@@ -59,12 +59,12 @@ data class ServingOptionResponse(val id: UUID, val label: String, val grams: Dou
 data class FoodSearchResultResponse(
     val id: UUID, val name: String, val brand: String?, val kcalPer100g: Double,
     val proteinGPer100g: Double, val fatGPer100g: Double, val carbsGPer100g: Double,
-    val trust: String, val servings: List<ServingOptionResponse>, val lastUsedGrams: Double?,
+    val source: String, val trust: String, val servings: List<ServingOptionResponse>, val lastUsedGrams: Double?,
 )
 
 fun FoodSearchResult.toResponse() = FoodSearchResultResponse(
     id, name, brand, kcalPer100g, proteinGPer100g, fatGPer100g, carbsGPer100g,
-    trust.dbValue, servings.map { ServingOptionResponse(it.id, it.label, it.grams, it.isDefault) }, lastUsedGrams,
+    source.dbValue, trust.dbValue, servings.map { ServingOptionResponse(it.id, it.label, it.grams, it.isDefault) }, lastUsedGrams,
 )
 
 data class FoodEntryResponse(

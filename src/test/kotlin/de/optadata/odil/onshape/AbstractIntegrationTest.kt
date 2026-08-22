@@ -1,6 +1,7 @@
 package de.optadata.odil.onshape
 
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection
+import org.springframework.test.context.TestPropertySource
 import org.testcontainers.containers.PostgreSQLContainer
 
 /**
@@ -12,7 +13,16 @@ import org.testcontainers.containers.PostgreSQLContainer
  * die zweite Testklasse haette sonst einen Kontext mit DataSource auf einen laengst
  * gestoppten Container. Stattdessen wird der Container einmalig beim Laden dieser Klasse
  * gestartet und lebt bis zum Prozessende (Aufraeumen uebernimmt Testcontainers' Ryuk).
+ *
+ * NFR-08: das produktive Rate-Limit fuer die Auth-Endpunkte (application.properties) ist bewusst
+ * niedrig genug, um echten Brute-Force zu bremsen -- fuer die Suite hier faellt aber der GESAMTE
+ * Registrierungs-Traffic vieler Testklassen in EINEN gecachten Kontext (Spring's Test-Context-
+ * Cache haelt identisch konfigurierte @SpringBootTest-Klassen in derselben Instanz), daher hier
+ * grosszuegig ueberschrieben. [de.optadata.odil.onshape.security.AuthRateLimitFilterIntegrationTest]
+ * ueberschreibt das wiederum eigens auf ein sehr niedriges Limit (eigener, dadurch isolierter
+ * Kontext) um das Verhalten selbst zu testen.
  */
+@TestPropertySource(properties = ["app.security.auth-rate-limit.max-requests=100000"])
 abstract class AbstractIntegrationTest {
 
     companion object {

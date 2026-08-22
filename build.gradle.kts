@@ -3,6 +3,7 @@ plugins {
     kotlin("plugin.spring") version "2.3.21"
     id("org.springframework.boot") version "4.1.0"
     id("io.spring.dependency-management") version "1.1.7"
+    jacoco
 }
 
 group = "de.optadata.odil"
@@ -54,4 +55,18 @@ kotlin {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+// NFR-13: Testabdeckung fuer die reinen Algorithmus-Kernmodule (Kalorien, Makros, Progression,
+// Fit-Score, ...) verifizieren. Bewusst nur ein REPORT, keine harte Verification-Rule -- die
+// Klassen liegen paketweise gemischt mit Spring-Services/-Repositories (die ueber
+// MockMvc-Integrationstests statt Unit-Tests laufen), ein pauschales Paket-Prozent-Gate wuerde
+// dort falsche Ausschlaege liefern. Report dient stattdessen als Nachweis, siehe docs/progress.md.
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    reports {
+        xml.required = true
+        html.required = true
+    }
 }

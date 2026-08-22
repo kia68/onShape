@@ -124,6 +124,11 @@ export function QuickAddSearch({
               <div className="text-xs text-muted-foreground">
                 {Math.round(result.kcalPer100g)} kcal / 100g{result.brand ? ` · ${result.brand}` : ""}
               </div>
+              {/* NFR-14: Quelle + Vertrauenslevel sind fuer den Nutzer sichtbar, nicht nur intern gespeichert. */}
+              <div className="mt-0.5 flex gap-1 text-[11px] text-muted-foreground">
+                <span className="rounded-full border border-input px-1.5 py-0.5">{t(`trust.${result.trust}`)}</span>
+                <span className="rounded-full border border-input px-1.5 py-0.5">{t(`source.${result.source}`)}</span>
+              </div>
             </div>
             <input
               type="number"

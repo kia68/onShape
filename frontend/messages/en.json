@@ -291,6 +291,37 @@
       "unknown_error": "Something went wrong. Please try again."
     }
   },
+  "Progress": {
+    "title": "Progress",
+    "from": "From",
+    "to": "To",
+    "weight": {
+      "title": "Weight history",
+      "legend": "Thin line: raw values · Thick line: 7-day moving average",
+      "empty": "No weight measurements in this period yet."
+    },
+    "nutrition": {
+      "title": "Nutrition",
+      "adherence": "Adherence: {pct}% of days logged",
+      "target": "Target {kcal} kcal",
+      "week": "Week {date}"
+    },
+    "volume": {
+      "title": "Training volume per muscle group",
+      "empty": "No logged sets in this period yet."
+    },
+    "strength": {
+      "title": "Strength history (estimated 1RM)",
+      "empty": "No logged exercises yet."
+    },
+    "export": {
+      "json": "Export as JSON",
+      "csv": "Export as CSV"
+    },
+    "errors": {
+      "unknown_error": "Something went wrong. Please try again."
+    }
+  },
   "Barcode": {
     "title": "Scan barcode",
     "cameraUnsupported": "Your browser doesn't support camera scanning. Enter the barcode manually.",

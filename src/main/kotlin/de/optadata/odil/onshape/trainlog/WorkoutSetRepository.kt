@@ -3,7 +3,10 @@ package de.optadata.odil.onshape.trainlog
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.stereotype.Repository
+import java.time.LocalDate
 import java.util.UUID
+
+data class WeeklyMuscleVolume(val weekStart: LocalDate, val muscle: String, val sets: Double)
 
 /** Muss innerhalb von `RlsSession.asUser` laufen (`via_session`-Policy, V8) -- `workout_sets`
  * hat keine eigene `user_id`-Spalte, RLS prueft ueber `workout_sessions`. */
@@ -91,6 +94,43 @@ class WorkoutSetRepository(private val jdbcTemplate: JdbcTemplate) {
             """.trimIndent(),
             { rs, _ -> rs.getTimestamp("logged_at").toInstant() to WorkingSetSample(rs.getDouble("weight_kg"), rs.getInt("reps")) },
             userId, exerciseId,
+        )
+
+    /** FR-132: alle Uebungen, zu denen dieser Nutzer jemals einen Satz geloggt hat -- fuer die
+     * Uebungsauswahl im Fortschritts-Screen. */
+    fun findLoggedExerciseIds(userId: UUID): List<UUID> =
+        jdbcTemplate.query(
+            """
+            SELECT DISTINCT exercise_id FROM workout_sets
+            WHERE session_id IN (SELECT id FROM workout_sessions WHERE user_id = ?) AND completed
+            """.trimIndent(),
+            { rs, _ -> rs.getObject("exercise_id", UUID::class.java) },
+            userId,
+        )
+
+    /** FR-133: TATSAECHLICH trainiertes Volumen pro Muskelgruppe pro Woche, aus geloggten
+     * Saetzen -- bewusst eine LIVE-Abfrage statt der materialisierten Sicht
+     * `weekly_muscle_volume` (V5): eine materialisierte Sicht braucht einen periodischen
+     * `REFRESH`-Job, den es in dieser Session nicht gibt, und wuerde sonst veraltete Werte
+     * liefern. Gleiche Aggregationslogik (Gewichtung mit `exercise_muscles.factor`, §7.4). */
+    fun findWeeklyMuscleVolume(userId: UUID, from: LocalDate, to: LocalDate): List<WeeklyMuscleVolume> =
+        jdbcTemplate.query(
+            """
+            SELECT date_trunc('week', ws.logged_at)::date AS week_start, em.muscle, SUM(em.factor) AS sets
+            FROM workout_sets ws
+            JOIN workout_sessions s ON s.id = ws.session_id
+            JOIN exercise_muscles em ON em.exercise_id = ws.exercise_id
+            WHERE s.user_id = ? AND ws.completed AND NOT ws.is_warmup AND ws.logged_at::date BETWEEN ? AND ?
+            GROUP BY 1, 2 ORDER BY 1, 2
+            """.trimIndent(),
+            { rs, _ ->
+                WeeklyMuscleVolume(
+                    weekStart = rs.getObject("week_start", LocalDate::class.java),
+                    muscle = rs.getString("muscle"),
+                    sets = rs.getDouble("sets"),
+                )
+            },
+            userId, from, to,
         )
 
     private val rowMapper = RowMapper { rs, _ ->

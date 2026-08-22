@@ -48,6 +48,11 @@ class WorkoutSessionRepository(private val jdbcTemplate: JdbcTemplate) {
             rowMapper, userId,
         ).firstOrNull()
 
+    /** FR-137 (Datenexport): wirklich ALLE Sessions, auch eine gerade laufende (anders als
+     * [findHistory], das bewusst nur beendete Workouts fuer die Verlaufsansicht liefert). */
+    fun findAllForUser(userId: UUID): List<WorkoutSession> =
+        jdbcTemplate.query("$SELECT_SQL WHERE user_id = ? ORDER BY started_at", rowMapper, userId)
+
     fun findHistory(userId: UUID, limit: Int): List<WorkoutSession> =
         jdbcTemplate.query(
             "$SELECT_SQL WHERE user_id = ? AND finished_at IS NOT NULL ORDER BY started_at DESC LIMIT ?",

@@ -32,6 +32,9 @@ data class FoodEntry(
  * wird. */
 data class FoodEntryWithName(val entry: FoodEntry, val name: String?)
 
+/** FR-131: taegliche Summe fuer den Kalorien-/Makro-Verlauf, siehe [FoodEntryRepository.findDailyTotals]. */
+data class DailyNutritionTotal(val date: LocalDate, val kcal: Double, val proteinG: Double, val fatG: Double, val carbsG: Double)
+
 data class NewFoodEntry(
     val foodId: UUID?,
     val recipeId: UUID?,

@@ -36,6 +36,10 @@ class WaterEntryRepository(private val jdbcTemplate: JdbcTemplate) {
     fun findByDate(userId: UUID, date: LocalDate): List<WaterEntry> =
         jdbcTemplate.query(SELECT_SQL + " WHERE user_id = ? AND logged_date = ? ORDER BY created_at", rowMapper, userId, date)
 
+    /** FR-137 (Datenexport). */
+    fun findAllForUser(userId: UUID): List<WaterEntry> =
+        jdbcTemplate.query(SELECT_SQL + " WHERE user_id = ? ORDER BY logged_date", rowMapper, userId)
+
     fun delete(userId: UUID, id: UUID): Boolean =
         jdbcTemplate.update("DELETE FROM water_entries WHERE id = ? AND user_id = ?", id, userId) > 0
 

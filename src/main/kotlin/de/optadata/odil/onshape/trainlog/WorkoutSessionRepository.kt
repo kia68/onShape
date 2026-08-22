@@ -3,6 +3,8 @@ package de.optadata.odil.onshape.trainlog
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.stereotype.Repository
+import java.sql.Timestamp
+import java.time.Instant
 import java.util.UUID
 
 /** Muss innerhalb von `RlsSession.asUser` laufen (owner_only, V8). Idempotenz-Muster fuer
@@ -26,6 +28,32 @@ class WorkoutSessionRepository(private val jdbcTemplate: JdbcTemplate) {
             ?: (clientId?.let { findByClientId(userId, it)?.id }
                 ?: error("Insert into workout_sessions returned no id and no client_id conflict to recover from"))
         return findById(id) ?: error("Just-inserted workout_sessions row $id not found")
+    }
+
+    /** FR-153: importierte Session mit einem HISTORISCHEN Zeitstempel aus der Quelldatei (nicht
+     * `now()` wie [start]). `clientId` wird aus den Quelldaten synthetisiert (z.B.
+     * `"import:hevy:<start_time>:<title>"`), damit ein erneuter Import derselben Datei
+     * idempotent bleibt statt Duplikate anzulegen -- gleiches Muster wie beim Offline-Sync. */
+    /** Rueckgabe traegt zusaetzlich, ob die Zeile neu angelegt wurde (`true`) oder bereits per
+     * `clientId` existierte (`false`) -- damit [de.optadata.odil.onshape.integrations.ImportService]
+     * einen erneuten Import derselben Datei ehrlich als "0 neu" statt "N verarbeitet" melden kann. */
+    fun insertImported(userId: UUID, startedAt: Instant, finishedAt: Instant?, notes: String?, clientId: String): Pair<WorkoutSession, Boolean> {
+        val insertedId = jdbcTemplate.query(
+            """
+            INSERT INTO workout_sessions (user_id, started_at, finished_at, notes, client_id)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT (user_id, client_id) WHERE client_id IS NOT NULL DO NOTHING
+            RETURNING id
+            """.trimIndent(),
+            { rs, _ -> rs.getObject("id", UUID::class.java) },
+            userId, Timestamp.from(startedAt), finishedAt?.let { Timestamp.from(it) }, notes, clientId,
+        ).firstOrNull()
+
+        val wasNew = insertedId != null
+        val id = insertedId
+            ?: (findByClientId(userId, clientId)?.id
+                ?: error("Insert into workout_sessions returned no id and no client_id conflict to recover from"))
+        return (findById(id) ?: error("Just-inserted workout_sessions row $id not found")) to wasNew
     }
 
     fun finish(userId: UUID, id: UUID, perceivedEffort: Int?, notes: String?): WorkoutSession? {

@@ -3,6 +3,8 @@ package de.optadata.odil.onshape.trainlog
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.RowMapper
 import org.springframework.stereotype.Repository
+import java.sql.Timestamp
+import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
 
@@ -42,6 +44,40 @@ class WorkoutSetRepository(private val jdbcTemplate: JdbcTemplate) {
             ?: (clientId?.let { findByClientId(sessionId, it)?.id }
                 ?: error("Insert into workout_sets returned no id and no client_id conflict to recover from"))
         return findById(id) ?: error("Just-inserted workout_sets row $id not found")
+    }
+
+    /** FR-153: importierter Satz mit HISTORISCHEM `loggedAt` statt der Spalten-Default `now()`
+     * (siehe [WorkoutSessionRepository.insertImported] fuer denselben Grund). */
+    /** Siehe [WorkoutSessionRepository.insertImported] fuer den Grund der `Boolean`-Rueckgabe
+     * (neu angelegt vs. per `clientId`-Konflikt wiedergefunden). */
+    fun insertImported(
+        sessionId: UUID,
+        exerciseId: UUID,
+        setIndex: Int,
+        weightKg: Double?,
+        reps: Int?,
+        durationSec: Int?,
+        distanceM: Double?,
+        loggedAt: Instant,
+        clientId: String,
+    ): Pair<WorkoutSet, Boolean> {
+        val insertedId = jdbcTemplate.query(
+            """
+            INSERT INTO workout_sets
+                (session_id, exercise_id, set_index, weight_kg, reps, duration_sec, distance_m, is_warmup, completed, logged_at, client_id)
+            VALUES (?, ?, ?, ?, ?, ?, ?, false, true, ?, ?)
+            ON CONFLICT (session_id, client_id) WHERE client_id IS NOT NULL DO NOTHING
+            RETURNING id
+            """.trimIndent(),
+            { rs, _ -> rs.getObject("id", UUID::class.java) },
+            sessionId, exerciseId, setIndex, weightKg, reps, durationSec, distanceM, Timestamp.from(loggedAt), clientId,
+        ).firstOrNull()
+
+        val wasNew = insertedId != null
+        val id = insertedId
+            ?: (findByClientId(sessionId, clientId)?.id
+                ?: error("Insert into workout_sets returned no id and no client_id conflict to recover from"))
+        return (findById(id) ?: error("Just-inserted workout_sets row $id not found")) to wasNew
     }
 
     fun findById(id: UUID): WorkoutSet? = jdbcTemplate.query("$SELECT_SQL WHERE id = ?", rowMapper, id).firstOrNull()

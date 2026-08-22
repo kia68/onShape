@@ -192,6 +192,7 @@
     "weeksLabel": "Weeks",
     "generate": "Generate plan",
     "regenerate": "Regenerate",
+    "startWorkout": "Start workout",
     "splitSummary": "{splitType} · {daysPerWeek} days/week · {weeks} weeks",
     "week": "Week {week}",
     "deloadNotice": "Deload week: reduced volume for recovery.",
@@ -235,6 +236,31 @@
     },
     "errors": {
       "no_alternative": "No alternative available with your equipment.",
+      "unknown_error": "Something went wrong. Please try again."
+    }
+  },
+  "TrainingLog": {
+    "setProgress": "Set {current} of {total}",
+    "targetReps": "{min}–{max} reps",
+    "targetDuration": "{minutes} min",
+    "lastTime": "Last time: {weight} kg × {reps}",
+    "weightLabel": "Weight (kg)",
+    "repsLabel": "Reps",
+    "logSet": "Log set",
+    "restTimer": "Rest",
+    "workoutDone": "Workout done!",
+    "finishWorkout": "Finish workout",
+    "backToPlan": "Back to plan",
+    "newRecord": "New record",
+    "offlinePending": "{count} set(s) waiting for connection",
+    "recordType": {
+      "MAX_WEIGHT": "Weight",
+      "MAX_REPS_AT_WEIGHT": "Reps",
+      "EST_1RM": "estimated 1RM",
+      "VOLUME": "Volume"
+    },
+    "errors": {
+      "noSession": "No active workout. Start one from your plan.",
       "unknown_error": "Something went wrong. Please try again."
     }
   },

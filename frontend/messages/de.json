@@ -192,6 +192,7 @@
     "weeksLabel": "Wochen",
     "generate": "Plan generieren",
     "regenerate": "Neu generieren",
+    "startWorkout": "Workout starten",
     "splitSummary": "{splitType} · {daysPerWeek} Tage/Woche · {weeks} Wochen",
     "week": "Woche {week}",
     "deloadNotice": "Deload-Woche: reduziertes Volumen zur Erholung.",
@@ -235,6 +236,31 @@
     },
     "errors": {
       "no_alternative": "Keine Alternative mit deinem Equipment verfügbar.",
+      "unknown_error": "Etwas ist schiefgelaufen. Bitte versuch es erneut."
+    }
+  },
+  "TrainingLog": {
+    "setProgress": "Satz {current} von {total}",
+    "targetReps": "{min}–{max} Wiederholungen",
+    "targetDuration": "{minutes} Min.",
+    "lastTime": "Letztes Mal: {weight} kg × {reps}",
+    "weightLabel": "Gewicht (kg)",
+    "repsLabel": "Wiederholungen",
+    "logSet": "Satz eintragen",
+    "restTimer": "Pause",
+    "workoutDone": "Workout geschafft!",
+    "finishWorkout": "Workout beenden",
+    "backToPlan": "Zurück zum Plan",
+    "newRecord": "Neuer Rekord",
+    "offlinePending": "{count} Satz/Sätze wartet/warten auf Verbindung",
+    "recordType": {
+      "MAX_WEIGHT": "Gewicht",
+      "MAX_REPS_AT_WEIGHT": "Wiederholungen",
+      "EST_1RM": "geschätztes 1RM",
+      "VOLUME": "Volumen"
+    },
+    "errors": {
+      "noSession": "Kein laufendes Workout. Starte eines von deinem Plan aus.",
       "unknown_error": "Etwas ist schiefgelaufen. Bitte versuch es erneut."
     }
   },

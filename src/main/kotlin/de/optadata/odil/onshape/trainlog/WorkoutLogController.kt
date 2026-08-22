@@ -70,4 +70,9 @@ class WorkoutLogController(private val workoutLogService: WorkoutLogService) {
     @GetMapping("/exercises/{exerciseId}/personal-bests")
     fun personalBests(@PathVariable exerciseId: UUID, authentication: Authentication): PersonalBestsResponse =
         workoutLogService.personalBests(authentication.currentUserId(), exerciseId).toResponse()
+
+    /** FR-132: Uebungsauswahl fuer den Fortschritts-Screen. */
+    @GetMapping("/exercises/logged")
+    fun loggedExercises(authentication: Authentication): List<LoggedExerciseResponse> =
+        workoutLogService.loggedExercises(authentication.currentUserId()).map { LoggedExerciseResponse(it.id, it.name) }
 }

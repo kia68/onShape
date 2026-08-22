@@ -1,6 +1,8 @@
 package de.optadata.odil.onshape.trainlog
 
 import de.optadata.odil.onshape.security.RlsSession
+import de.optadata.odil.onshape.training.Exercise
+import de.optadata.odil.onshape.training.ExerciseRepository
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Service
 import org.springframework.web.server.ResponseStatusException
@@ -28,6 +30,7 @@ data class OneRepMaxPoint(val loggedAt: Instant, val estimated1Rm: Double)
 class WorkoutLogService(
     private val workoutSessionRepository: WorkoutSessionRepository,
     private val workoutSetRepository: WorkoutSetRepository,
+    private val exerciseRepository: ExerciseRepository,
     private val rlsSession: RlsSession,
 ) {
 
@@ -97,5 +100,12 @@ class WorkoutLogService(
     fun personalBests(userId: UUID, exerciseId: UUID): PriorBests = rlsSession.asUser(userId) {
         val history = workoutSetRepository.findWorkingSetHistory(userId, exerciseId).map { it.second }
         PersonalRecordDetector.priorBestsFrom(history, newWeightKg = 0.0)
+    }
+
+    /** FR-132: Uebungsauswahl fuer den Fortschritts-Screen -- nur Uebungen, zu denen es
+     * ueberhaupt eine Verlaufskurve geben kann. */
+    fun loggedExercises(userId: UUID): List<Exercise> {
+        val loggedIds = rlsSession.asUser(userId) { workoutSetRepository.findLoggedExerciseIds(userId) }.toSet()
+        return exerciseRepository.findAll().filter { it.id in loggedIds }
     }
 }

@@ -61,6 +61,15 @@ class ProgramRepository(
         return findById(programId)
     }
 
+    /** FR-137 (Datenexport): alle eigenen Programme (aktiv + Historie), NICHT die
+     * userlosen Vorlagen (`user_id IS NULL`). */
+    fun findAllForUser(userId: UUID): List<Program> =
+        jdbcTemplate.query(
+            "SELECT id FROM programs WHERE user_id = ? ORDER BY created_at",
+            { rs, _ -> rs.getObject("id", UUID::class.java) },
+            userId,
+        ).mapNotNull { findById(it) }
+
     fun findById(id: UUID): Program? {
         val header = jdbcTemplate.query(HEADER_SQL, { rs, _ -> rs.toHeader() }, id).firstOrNull() ?: return null
         val days = jdbcTemplate.query(

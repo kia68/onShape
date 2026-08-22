@@ -55,6 +55,10 @@ class FoodEntryRepository(
             userId, date,
         )
 
+    /** FR-137 (Datenexport). */
+    fun findAllForUser(userId: UUID): List<FoodEntry> =
+        jdbcTemplate.query(SELECT_SQL + " WHERE user_id = ? ORDER BY logged_date, created_at", { rs, _ -> rs.toEntry() }, userId)
+
     /** FR-20: Tagesansicht mit lesbarem Namen statt nur `food_id`/`recipe_id`. */
     fun findByDateWithNames(userId: UUID, date: LocalDate, locale: String): List<FoodEntryWithName> {
         val nameColumn = if (locale == "en") "name_en" else "name_de"
@@ -76,6 +80,27 @@ class FoodEntryRepository(
 
     fun delete(userId: UUID, id: UUID): Boolean =
         jdbcTemplate.update("DELETE FROM food_entries WHERE id = ? AND user_id = ?", id, userId) > 0
+
+    /** FR-131: taegliche Summen fuer den Kalorien-/Makro-Verlauf. Nur Tage MIT mindestens einem
+     * Eintrag werden zurueckgegeben (fehlende Tage = nicht geloggt, siehe [de.optadata.odil.onshape.progress.AdherenceCalculator]). */
+    fun findDailyTotals(userId: UUID, from: LocalDate, to: LocalDate): List<DailyNutritionTotal> =
+        jdbcTemplate.query(
+            """
+            SELECT logged_date, SUM(kcal) AS kcal, SUM(protein_g) AS protein_g, SUM(fat_g) AS fat_g, SUM(carbs_g) AS carbs_g
+            FROM food_entries WHERE user_id = ? AND logged_date BETWEEN ? AND ?
+            GROUP BY logged_date ORDER BY logged_date
+            """.trimIndent(),
+            { rs, _ ->
+                DailyNutritionTotal(
+                    date = rs.getObject("logged_date", LocalDate::class.java),
+                    kcal = rs.getDouble("kcal"),
+                    proteinG = rs.getDouble("protein_g"),
+                    fatG = rs.getDouble("fat_g"),
+                    carbsG = rs.getDouble("carbs_g"),
+                )
+            },
+            userId, from, to,
+        )
 
     private fun ResultSet.toEntry() = FoodEntry(
         id = getObject("id", UUID::class.java),

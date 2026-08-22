@@ -291,6 +291,37 @@
       "unknown_error": "Etwas ist schiefgelaufen. Bitte versuch es erneut."
     }
   },
+  "Progress": {
+    "title": "Fortschritt",
+    "from": "Von",
+    "to": "Bis",
+    "weight": {
+      "title": "Gewichtsverlauf",
+      "legend": "Duenne Linie: Rohwerte · Dicke Linie: gleitendes 7-Tage-Mittel",
+      "empty": "Noch keine Gewichtsmessungen in diesem Zeitraum."
+    },
+    "nutrition": {
+      "title": "Ernaehrung",
+      "adherence": "Adhaerenz: {pct}% der Tage geloggt",
+      "target": "Ziel {kcal} kcal",
+      "week": "Woche {date}"
+    },
+    "volume": {
+      "title": "Trainingsvolumen pro Muskelgruppe",
+      "empty": "Noch keine geloggten Saetze in diesem Zeitraum."
+    },
+    "strength": {
+      "title": "Kraftverlauf (geschaetztes 1RM)",
+      "empty": "Noch keine geloggten Uebungen."
+    },
+    "export": {
+      "json": "Export als JSON",
+      "csv": "Export als CSV"
+    },
+    "errors": {
+      "unknown_error": "Etwas ist schiefgelaufen. Bitte versuch es erneut."
+    }
+  },
   "Barcode": {
     "title": "Barcode scannen",
     "cameraUnsupported": "Dein Browser unterstützt keinen Kamera-Scan. Gib den Barcode manuell ein.",

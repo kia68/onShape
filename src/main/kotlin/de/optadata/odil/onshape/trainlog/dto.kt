@@ -8,6 +8,8 @@ import java.util.UUID
 
 data class StartSessionRequest(val programDayId: UUID?, val clientId: String?)
 
+data class LoggedExerciseResponse(val id: UUID, val name: String)
+
 data class FinishSessionRequest(@field:Min(1) @field:Max(10) val perceivedEffort: Int?, val notes: String?)
 
 data class WorkoutSessionResponse(

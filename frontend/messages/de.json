@@ -186,6 +186,58 @@
       "unknown_error": "Etwas ist schiefgelaufen. Bitte versuch es erneut."
     }
   },
+  "Training": {
+    "title": "Trainingsplan",
+    "noPlan": "Noch kein Plan. Erstelle einen aus deinem Profil.",
+    "weeksLabel": "Wochen",
+    "generate": "Plan generieren",
+    "regenerate": "Neu generieren",
+    "splitSummary": "{splitType} · {daysPerWeek} Tage/Woche · {weeks} Wochen",
+    "week": "Woche {week}",
+    "deloadNotice": "Deload-Woche: reduziertes Volumen zur Erholung.",
+    "split": {
+      "full_body": "Ganzkörper",
+      "upper_lower": "Oberkörper/Unterkörper",
+      "ppl_upper_lower": "Push/Pull/Legs + Oberkörper/Unterkörper",
+      "ppl": "Push/Pull/Legs"
+    },
+    "swap": {
+      "action": "Tauschen …",
+      "reason": {
+        "too_hard": "Zu schwer",
+        "equipment_occupied": "Gerät belegt",
+        "pain": "Schmerzen",
+        "dislike": "Gefällt mir nicht",
+        "other": "Anderer Grund"
+      }
+    },
+    "volume": {
+      "title": "Volumen pro Muskelgruppe (diese Woche)",
+      "muscle": {
+        "quads": "Quadrizeps",
+        "glutes": "Gesäß",
+        "hamstrings": "Hamstrings",
+        "lower_back": "Unterer Rücken",
+        "chest": "Brust",
+        "front_delt": "Vordere Schulter",
+        "side_delt": "Seitliche Schulter",
+        "triceps": "Trizeps",
+        "upper_back": "Oberer Rücken",
+        "biceps": "Bizeps",
+        "rear_delt": "Hintere Schulter",
+        "lats": "Latissimus",
+        "forearms": "Unterarme",
+        "traps": "Trapezmuskel",
+        "abs": "Bauch",
+        "obliques": "Seitliche Bauchmuskeln",
+        "calves": "Waden"
+      }
+    },
+    "errors": {
+      "no_alternative": "Keine Alternative mit deinem Equipment verfügbar.",
+      "unknown_error": "Etwas ist schiefgelaufen. Bitte versuch es erneut."
+    }
+  },
   "Barcode": {
     "title": "Barcode scannen",
     "cameraUnsupported": "Dein Browser unterstützt keinen Kamera-Scan. Gib den Barcode manuell ein.",

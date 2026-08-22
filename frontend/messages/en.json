@@ -186,6 +186,58 @@
       "unknown_error": "Something went wrong. Please try again."
     }
   },
+  "Training": {
+    "title": "Training plan",
+    "noPlan": "No plan yet. Generate one from your profile.",
+    "weeksLabel": "Weeks",
+    "generate": "Generate plan",
+    "regenerate": "Regenerate",
+    "splitSummary": "{splitType} · {daysPerWeek} days/week · {weeks} weeks",
+    "week": "Week {week}",
+    "deloadNotice": "Deload week: reduced volume for recovery.",
+    "split": {
+      "full_body": "Full body",
+      "upper_lower": "Upper/lower",
+      "ppl_upper_lower": "Push/pull/legs + upper/lower",
+      "ppl": "Push/pull/legs"
+    },
+    "swap": {
+      "action": "Swap …",
+      "reason": {
+        "too_hard": "Too hard",
+        "equipment_occupied": "Equipment occupied",
+        "pain": "Pain",
+        "dislike": "Don't like it",
+        "other": "Other reason"
+      }
+    },
+    "volume": {
+      "title": "Volume per muscle group (this week)",
+      "muscle": {
+        "quads": "Quads",
+        "glutes": "Glutes",
+        "hamstrings": "Hamstrings",
+        "lower_back": "Lower back",
+        "chest": "Chest",
+        "front_delt": "Front delts",
+        "side_delt": "Side delts",
+        "triceps": "Triceps",
+        "upper_back": "Upper back",
+        "biceps": "Biceps",
+        "rear_delt": "Rear delts",
+        "lats": "Lats",
+        "forearms": "Forearms",
+        "traps": "Traps",
+        "abs": "Abs",
+        "obliques": "Obliques",
+        "calves": "Calves"
+      }
+    },
+    "errors": {
+      "no_alternative": "No alternative available with your equipment.",
+      "unknown_error": "Something went wrong. Please try again."
+    }
+  },
   "Barcode": {
     "title": "Scan barcode",
     "cameraUnsupported": "Your browser doesn't support camera scanning. Enter the barcode manually.",

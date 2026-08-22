@@ -177,7 +177,7 @@ export function ProgressView() {
                     <li key={entry.muscle} className="flex justify-between text-sm">
                       <span>{entry.muscle}</span>
                       <span className={status === "in_range" ? "text-emerald-600" : status === "under" ? "text-amber-600" : "text-destructive"}>
-                        {entry.sets.toFixed(1)} / {entry.corridorMin}–{entry.corridorMax}
+                        {entry.sets.toFixed(1)} / {entry.corridorMin}–{entry.corridorMax} · {t(`volume.status.${status}`)}
                       </span>
                     </li>
                   );

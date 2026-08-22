@@ -75,4 +75,23 @@ class PlausibilityCheckerTest {
         val plausible = food(kcal = 250.0, proteinG = 5.0, fatG = 10.0, carbsG = 40.0, fiberG = 3.0)
         assertEquals(true, PlausibilityChecker.evaluate(plausible).isPlausible)
     }
+
+    @Test
+    fun `evaluate flags einen atwater-mismatch ueber evaluate selbst`() {
+        val result = PlausibilityChecker.evaluate(food(kcal = 500.0, proteinG = 10.0, fatG = 10.0, carbsG = 10.0))
+        assertTrue(PlausibilityFlag.ATWATER_MISMATCH in result.flags)
+    }
+
+    @Test
+    fun `evaluate flags eine makrosumme ueber 100g ueber evaluate selbst`() {
+        val result = PlausibilityChecker.evaluate(food(kcal = 400.0, proteinG = 40.0, fatG = 40.0, carbsG = 40.0))
+        assertTrue(PlausibilityFlag.MACRO_SUM_EXCEEDS_100G in result.flags)
+    }
+
+    @Test
+    fun `evaluate flags einen kategorie-ausreisser wenn categoryStats mitgegeben werden`() {
+        val stats = CategoryStats(meanKcal = 250.0, stdDevKcal = 50.0)
+        val result = PlausibilityChecker.evaluate(food(kcal = 900.0, proteinG = 25.0, fatG = 100.0, carbsG = 0.0), categoryStats = stats)
+        assertTrue(PlausibilityFlag.CATEGORY_OUTLIER in result.flags)
+    }
 }

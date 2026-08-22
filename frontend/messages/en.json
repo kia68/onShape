@@ -176,7 +176,20 @@
       "placeholder": "Search food …",
       "gramsLabel": "g",
       "noResults": "No results",
-      "logButton": "Log"
+      "logButton": "Log",
+      "trust": {
+        "verified": "Verified",
+        "community": "Community",
+        "estimated": "Estimated"
+      },
+      "source": {
+        "bls": "BLS 4.0",
+        "usda": "USDA",
+        "off": "Open Food Facts",
+        "brand_verified": "Brand",
+        "user": "User entry",
+        "ai_estimate": "AI estimate"
+      }
     },
     "offline": {
       "pending": "{count} entr(y/ies) waiting for connection",
@@ -232,6 +245,11 @@
         "abs": "Abs",
         "obliques": "Obliques",
         "calves": "Calves"
+      },
+      "status": {
+        "UNDER": "Below corridor",
+        "IN_RANGE": "In corridor",
+        "OVER": "Above corridor"
       }
     },
     "errors": {
@@ -308,7 +326,12 @@
     },
     "volume": {
       "title": "Training volume per muscle group",
-      "empty": "No logged sets in this period yet."
+      "empty": "No logged sets in this period yet.",
+      "status": {
+        "under": "Below corridor",
+        "in_range": "In corridor",
+        "over": "Above corridor"
+      }
     },
     "strength": {
       "title": "Strength history (estimated 1RM)",

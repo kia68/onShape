@@ -216,5 +216,8 @@ class NutritionEntryControllerIntegrationTest : AbstractIntegrationTest() {
             .andExpect(status().isOk)
             .andExpect(jsonPath("$[0].id").value(foodId.toString()))
             .andExpect(jsonPath("$[0].lastUsedGrams").value(137.0))
+            // NFR-14: Quelle + Vertrauenslevel muessen im Suchergebnis mitkommen, sichtbar fuer den Nutzer.
+            .andExpect(jsonPath("$[0].source").value("user"))
+            .andExpect(jsonPath("$[0].trust").value("estimated"))
     }
 }

@@ -52,6 +52,26 @@ class SplitAssignerTest {
     }
 
     @Test
+    fun `splitTypeOverride ueberschreibt die automatische zuordnung fuer jeden gueltigen wert`() {
+        assertEquals("full_body", SplitAssigner.assign(4, Experience.ADVANCED, splitTypeOverride = "full_body").splitType)
+        assertEquals("upper_lower", SplitAssigner.assign(6, Experience.ADVANCED, splitTypeOverride = "upper_lower").splitType)
+        assertEquals("ppl_upper_lower", SplitAssigner.assign(2, Experience.ADVANCED, splitTypeOverride = "ppl_upper_lower").splitType)
+        assertEquals("ppl", SplitAssigner.assign(4, Experience.ADVANCED, splitTypeOverride = "ppl").splitType)
+    }
+
+    @Test
+    fun `splitTypeOverride ueberschreibt auch die anfaenger-hartregel`() {
+        val plan = SplitAssigner.assign(6, Experience.BEGINNER, splitTypeOverride = "ppl")
+        assertEquals("ppl", plan.splitType)
+    }
+
+    @Test
+    fun `unbekannter splitTypeOverride faellt auf die automatische zuordnung zurueck`() {
+        val plan = SplitAssigner.assign(4, Experience.INTERMEDIATE, splitTypeOverride = "does-not-exist")
+        assertEquals("upper_lower", plan.splitType)
+    }
+
+    @Test
     fun `alle sechs grundmuster sind ueber die woche abgedeckt bei jedem split`() {
         for (days in 2..6) {
             for (experience in Experience.entries) {

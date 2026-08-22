@@ -1,5 +1,6 @@
 package de.optadata.odil.onshape.nutrition
 
+import de.optadata.odil.onshape.foodimport.FoodSource
 import de.optadata.odil.onshape.foodimport.TrustLevel
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Repository
@@ -21,7 +22,7 @@ class FoodSearchRepository(private val jdbcTemplate: JdbcTemplate) {
         val nameColumn = if (locale == "en") "name_en" else "name_de"
         val tsConfig = if (locale == "en") "english" else "german"
         val sql = """
-            SELECT id, $nameColumn AS name, brand, kcal, protein_g, fat_g, carbs_g, trust,
+            SELECT id, $nameColumn AS name, brand, kcal, protein_g, fat_g, carbs_g, source, trust,
                    GREATEST(
                        ts_rank(to_tsvector('$tsConfig', coalesce(brand,'') || ' ' || $nameColumn), plainto_tsquery('$tsConfig', ?)),
                        similarity($nameColumn, ?)
@@ -49,6 +50,7 @@ class FoodSearchRepository(private val jdbcTemplate: JdbcTemplate) {
                 proteinGPer100g = row.proteinG,
                 fatGPer100g = row.fatG,
                 carbsGPer100g = row.carbsG,
+                source = row.source,
                 trust = row.trust,
                 servings = servingsByFood[row.id] ?: emptyList(),
                 lastUsedGrams = lastUsedByFood[row.id],
@@ -112,12 +114,13 @@ class FoodSearchRepository(private val jdbcTemplate: JdbcTemplate) {
         proteinG = getDouble("protein_g"),
         fatG = getDouble("fat_g"),
         carbsG = getDouble("carbs_g"),
+        source = FoodSource.entries.first { it.dbValue == getString("source") },
         trust = TrustLevel.entries.first { it.dbValue == getString("trust") },
     )
 
     private data class SearchRow(
         val id: UUID, val name: String, val brand: String?, val kcal: Double,
-        val proteinG: Double, val fatG: Double, val carbsG: Double, val trust: TrustLevel,
+        val proteinG: Double, val fatG: Double, val carbsG: Double, val source: FoodSource, val trust: TrustLevel,
     )
 }
 

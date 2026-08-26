@@ -15,6 +15,7 @@ import {
   type FoodSearchResult,
   type MealSlot,
 } from "@/lib/nutritionApi";
+import { fetchGuardrailStatus, type GuardrailStatusResponse } from "@/lib/legalApi";
 import { QuickAddSearch } from "./QuickAddSearch";
 
 const SLOTS: MealSlot[] = ["breakfast", "lunch", "dinner", "snack", "pre_workout", "post_workout"];
@@ -49,6 +50,7 @@ export function NutritionDayView({ locale }: { locale: string }) {
   const [pendingEntries, setPendingEntries] = useState<FoodEntry[]>([]);
   const [pending, setPending] = useState(pendingCount());
   const [error, setError] = useState<string | null>(null);
+  const [guardrail, setGuardrail] = useState<GuardrailStatusResponse | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -76,6 +78,13 @@ export function NutritionDayView({ locale }: { locale: string }) {
       load();
     });
   }, [load]);
+
+  useEffect(() => {
+    // LEGAL-12 (KONZEPT.md §14.5): unabhaengig vom betrachteten Tag, deshalb einmalig statt an
+    // [date] gekoppelt -- das Muster bezieht sich auf die letzten 7 Tage ab "heute", nicht auf
+    // den gerade angezeigten Tag.
+    fetchGuardrailStatus().then(setGuardrail).catch(() => setGuardrail(null));
+  }, []);
 
   const logSingle = async (food: FoodSearchResult, grams: number, slot: MealSlot) => {
     const result = await logFoodEntryWithOfflineFallback({ foodId: food.id, loggedDate: date, slot, grams, method: "quick_add" });
@@ -149,14 +158,34 @@ export function NutritionDayView({ locale }: { locale: string }) {
 
       <div className="rounded-md border border-input p-4">
         <h2 className="mb-2 text-sm font-semibold text-muted-foreground">{t("totals")}</h2>
-        <p className="text-2xl font-semibold">
-          {dayView.targetKcal ? t("kcalOfTarget", { kcal: Math.round(totalKcal), target: dayView.targetKcal }) : t("kcalNoTarget", { kcal: Math.round(totalKcal) })}
-        </p>
-        <div className="mt-2 flex gap-4 text-sm text-muted-foreground">
-          <span>{t("protein")}: {Math.round(dayView.totalProteinG)}g</span>
-          <span>{t("fat")}: {Math.round(dayView.totalFatG)}g</span>
-          <span>{t("carbs")}: {Math.round(dayView.totalCarbsG)}g</span>
-        </div>
+        {guardrail?.hideCalorieDisplay ? (
+          <div className="flex flex-col gap-2 text-sm">
+            <p className="font-medium">{t("wellbeing.title")}</p>
+            <p className="text-muted-foreground">{t("wellbeing.message")}</p>
+            {guardrail.resources.length > 0 && (
+              <div>
+                <p className="text-muted-foreground">{t("wellbeing.resourcesIntro")}</p>
+                <ul className="list-inside list-disc text-muted-foreground">
+                  {guardrail.resources.map((resource) => (
+                    <li key={resource.name}>{resource.name}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <p className="text-xs text-muted-foreground">{t("wellbeing.pauseHint")}</p>
+          </div>
+        ) : (
+          <>
+            <p className="text-2xl font-semibold">
+              {dayView.targetKcal ? t("kcalOfTarget", { kcal: Math.round(totalKcal), target: dayView.targetKcal }) : t("kcalNoTarget", { kcal: Math.round(totalKcal) })}
+            </p>
+            <div className="mt-2 flex gap-4 text-sm text-muted-foreground">
+              <span>{t("protein")}: {Math.round(dayView.totalProteinG)}g</span>
+              <span>{t("fat")}: {Math.round(dayView.totalFatG)}g</span>
+              <span>{t("carbs")}: {Math.round(dayView.totalCarbsG)}g</span>
+            </div>
+          </>
+        )}
         <Button size="sm" variant="outline" className="mt-3" onClick={handleCopyYesterday}>
           {t("copyYesterday")}
         </Button>

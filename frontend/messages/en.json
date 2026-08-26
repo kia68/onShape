@@ -28,6 +28,32 @@
       "loginTitle": "Log in",
       "loginSubmit": "Log in"
     },
+    "consent": {
+      "title": "Your consents",
+      "subtitle": "Split by purpose -- you can change everything except the core purpose later in your privacy settings.",
+      "core": {
+        "label": "Core function",
+        "description": "Processing your nutrition and training data for daily targets, plans, and progress. The app can't be used without this."
+      },
+      "photoAi": {
+        "label": "Photo AI processing",
+        "description": "Analyze meal photos with AI once that feature ships. Declining doesn't block anything else."
+      },
+      "wearableSync": {
+        "label": "Wearable sync",
+        "description": "Import data from fitness trackers/smartwatches once that feature ships."
+      },
+      "analytics": {
+        "label": "Anonymized product analytics",
+        "description": "Helps us improve the app. No health data, never shared with third parties."
+      },
+      "marketing": {
+        "label": "Marketing",
+        "description": "Occasional product news by email. Unsubscribe anytime."
+      },
+      "revocableHint": "You can revoke any consent except the core function at any time -- in the privacy settings.",
+      "submit": "Next"
+    },
     "basics": {
       "title": "About you",
       "sexLabel": "Sex",
@@ -131,7 +157,8 @@
       "fiber": "Fiber",
       "water": "Water",
       "explainToggle": "How was this calculated?",
-      "medicalAdvice": "Your answers suggest checking with a doctor before starting training. This is not disqualifying, just a hint."
+      "medicalAdvice": "Your answers suggest checking with a doctor before starting training. This is not disqualifying, just a hint.",
+      "privacySettingsLink": "Manage consents and pause mode"
     },
     "errors": {
       "email_taken": "This email is already registered.",
@@ -140,6 +167,8 @@
       "under_minimum_age": "A minimum age of 16 is required to use this app.",
       "target_weight_bmi_too_low": "That target weight would be unhealthily low for your height (BMI < 18.5).",
       "validation_failed": "Please check your input.",
+      "core_consent_required": "The app can't be used without consenting to the core function.",
+      "core_consent_immutable": "Consent to the core function can't be revoked.",
       "unknown_error": "Something went wrong. Please try again."
     }
   },
@@ -194,6 +223,12 @@
     "offline": {
       "pending": "{count} entr(y/ies) waiting for connection",
       "synced": "Synced"
+    },
+    "wellbeing": {
+      "title": "A short break from the calorie display",
+      "message": "We noticed a pattern that isn't doing you much good right now. The calorie display is hidden for these days -- counting comes back whenever you like. Logging food still works as normal.",
+      "resourcesIntro": "If you'd like to talk to someone, these organizations are there for you (look up their official website yourself):",
+      "pauseHint": "You can also pause tracking entirely -- in the privacy settings."
     },
     "errors": {
       "unknown_error": "Something went wrong. Please try again."
@@ -440,6 +475,34 @@
     "nutriscore": "Nutri-Score {grade}",
     "errors": {
       "unknown_error": "Something went wrong. Please try again."
+    }
+  },
+  "Settings": {
+    "privacy": {
+      "title": "Privacy & pause mode",
+      "consentsTitle": "Manage consents",
+      "consentsHint": "Every purpose except the core function can be toggled at any time.",
+      "purpose": {
+        "core": "Core function",
+        "photo_ai": "Photo AI processing",
+        "wearable_sync": "Wearable sync",
+        "analytics": "Anonymized product analytics",
+        "marketing": "Marketing"
+      },
+      "granted": "Granted",
+      "notGranted": "Not granted",
+      "grant": "Grant",
+      "revoke": "Revoke",
+      "coreLocked": "Required to use the app, can't be revoked.",
+      "pauseTitle": "Pause mode",
+      "pauseDescription": "Want a break from tracking? Your data stays fully intact, and there are no reminders while paused.",
+      "pauseActive": "Tracking paused since {date, date, medium}",
+      "pauseInactive": "Tracking is active.",
+      "pauseButton": "Pause tracking",
+      "resumeButton": "Resume tracking",
+      "errors": {
+        "unknown_error": "Something went wrong. Please try again."
+      }
     }
   }
 }

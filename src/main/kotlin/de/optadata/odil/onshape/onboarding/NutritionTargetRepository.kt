@@ -5,10 +5,16 @@ import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Repository
 import tools.jackson.databind.ObjectMapper
 import java.sql.ResultSet
+import java.sql.Timestamp
+import java.time.Instant
 import java.time.LocalDate
 import java.util.UUID
 
 data class StoredNutritionTarget(val validFrom: LocalDate, val result: NutritionTargetResult)
+
+/** Fuer die Wellbeing-Muster-Erkennung (Epic #12, LEGAL-12) -- nur die Kalorienzahl je
+ * Berechnung, nicht die volle Herleitung. */
+data class NutritionTargetKcalPoint(val createdAt: Instant, val kcal: Int)
 
 /** Schreibt/liest `nutrition_targets` (V1). Jede Berechnung ist ein neuer Datensatz, nie ein
  * Update (siehe Migrations-Kommentar: "Zielhistorie: nie ueberschreiben"). */
@@ -40,6 +46,15 @@ class NutritionTargetRepository(
             { rs, _ -> rs.toStoredTarget() },
             userId,
         ).firstOrNull()
+
+    /** LEGAL-12: fuer die Erkennung von haeufigem Ziel-Herunterschrauben, aufsteigend sortiert
+     * (die Erkennung selbst vergleicht jeweils aufeinanderfolgende Eintraege). */
+    fun findKcalHistorySince(userId: UUID, since: Instant): List<NutritionTargetKcalPoint> =
+        jdbcTemplate.query(
+            "SELECT created_at, kcal FROM nutrition_targets WHERE user_id = ? AND created_at >= ? ORDER BY created_at ASC",
+            { rs, _ -> NutritionTargetKcalPoint(rs.getTimestamp("created_at").toInstant(), rs.getInt("kcal")) },
+            userId, Timestamp.from(since),
+        )
 
     @Suppress("UNCHECKED_CAST")
     private fun ResultSet.toStoredTarget() = StoredNutritionTarget(

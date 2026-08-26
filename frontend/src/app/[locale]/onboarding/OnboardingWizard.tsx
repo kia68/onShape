@@ -5,14 +5,17 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { ApiError, getToken, submitOnboarding, type OnboardingResultResponse } from "@/lib/api";
 import { AccountStep } from "./AccountStep";
+import { ConsentStep } from "./ConsentStep";
 import { ErrorNotice } from "./FormControls";
 import { BasicsStep, GoalStep, SetupStep } from "./OnboardingSteps";
 import { ResultStep } from "./ResultStep";
 import { DEFAULT_DRAFT, draftToRequest, fillRequiredDefaults, type OnboardingDraft } from "./types";
 
 // FR-01..FR-11 als ein Flow. "account" zaehlt in der Fortschrittsanzeige mit (FR-10:
-// Onboarding <= 90s beginnt bei der Registrierung, nicht erst beim Profil).
-const STEPS = ["account", "basics", "goal", "setup"] as const;
+// Onboarding <= 90s beginnt bei der Registrierung, nicht erst beim Profil). "consent"
+// (LEGAL-11, Epic #12) ist ein eigener Schritt direkt nach der Registrierung, nicht in den
+// AGB versteckt (KONZEPT.md §14.1) -- vor jeder weiteren Profilangabe.
+const STEPS = ["account", "consent", "basics", "goal", "setup"] as const;
 
 export function OnboardingWizard({ locale }: { locale: string }) {
   const t = useTranslations("Onboarding");
@@ -60,6 +63,14 @@ export function OnboardingWizard({ locale }: { locale: string }) {
     );
   }
 
+  if (step === "consent") {
+    return (
+      <div className="mx-auto flex w-full max-w-md flex-col gap-6 p-6">
+        <ConsentStep onSubmitted={() => setStepIndex(2)} />
+      </div>
+    );
+  }
+
   const isLastStep = stepIndex === STEPS.length - 1;
 
   return (
@@ -73,7 +84,7 @@ export function OnboardingWizard({ locale }: { locale: string }) {
       {step === "setup" && <SetupStep draft={draft} onChange={patchDraft} />}
 
       <div className="flex items-center justify-between gap-3">
-        <Button type="button" variant="outline" disabled={stepIndex <= 1 || submitting} onClick={() => setStepIndex((i) => i - 1)}>
+        <Button type="button" variant="outline" disabled={stepIndex <= 2 || submitting} onClick={() => setStepIndex((i) => i - 1)}>
           {t("back")}
         </Button>
 

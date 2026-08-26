@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import type { OnboardingResultResponse } from "@/lib/api";
 
 /** FR-11: Ergebnis-Screen mit aufklappbarer Herleitung -- KONZEPT.md §5.1 Designprinzip
@@ -34,6 +35,12 @@ export function ResultStep({ result }: { result: OnboardingResultResponse }) {
         <summary className="cursor-pointer text-sm font-medium">{t("explainToggle")}</summary>
         <CalculationTree value={result.calculation} className="mt-3" />
       </details>
+
+      {/* LEGAL-11 (KONZEPT.md §14.1 "jederzeit widerrufbar"): einzige Verlinkung dorthin ausserhalb
+       * des initialen Einwilligungsschritts. */}
+      <Link href="/settings/privacy" className="text-sm text-muted-foreground underline underline-offset-4">
+        {t("privacySettingsLink")}
+      </Link>
     </div>
   );
 }

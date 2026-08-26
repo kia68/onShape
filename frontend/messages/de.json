@@ -28,6 +28,32 @@
       "loginTitle": "Anmelden",
       "loginSubmit": "Anmelden"
     },
+    "consent": {
+      "title": "Deine Einwilligungen",
+      "subtitle": "Getrennt nach Zweck -- du kannst jeden Punkt ausser der Kernfunktion jederzeit spaeter in den Datenschutz-Einstellungen aendern.",
+      "core": {
+        "label": "Kernfunktion",
+        "description": "Verarbeitung deiner Ernaehrungs- und Trainingsdaten fuer Tagesziele, Plaene und Auswertungen. Ohne diese Einwilligung ist die App nicht nutzbar."
+      },
+      "photoAi": {
+        "label": "Foto-KI-Verarbeitung",
+        "description": "Mahlzeitenfotos per KI analysieren lassen, sobald diese Funktion verfuegbar ist. Ablehnen blockiert nichts anderes."
+      },
+      "wearableSync": {
+        "label": "Wearable-Sync",
+        "description": "Daten aus Fitness-Trackern/Smartwatches uebernehmen, sobald diese Funktion verfuegbar ist."
+      },
+      "analytics": {
+        "label": "Anonymisierte Produktanalyse",
+        "description": "Hilft uns, die App zu verbessern. Keine Gesundheitsdaten, keine Weitergabe an Dritte."
+      },
+      "marketing": {
+        "label": "Marketing",
+        "description": "Gelegentliche Produkt-Neuigkeiten per E-Mail. Jederzeit abbestellbar."
+      },
+      "revocableHint": "Du kannst jede Einwilligung ausser der Kernfunktion jederzeit widerrufen -- in den Datenschutz-Einstellungen.",
+      "submit": "Weiter"
+    },
     "basics": {
       "title": "Über dich",
       "sexLabel": "Geschlecht",
@@ -131,7 +157,8 @@
       "fiber": "Ballaststoffe",
       "water": "Wasser",
       "explainToggle": "Wie kam das zustande?",
-      "medicalAdvice": "Deine Angaben legen nahe, vor dem Trainingsstart ärztlichen Rat einzuholen. Das ist kein Ausschlussgrund, nur ein Hinweis."
+      "medicalAdvice": "Deine Angaben legen nahe, vor dem Trainingsstart ärztlichen Rat einzuholen. Das ist kein Ausschlussgrund, nur ein Hinweis.",
+      "privacySettingsLink": "Einwilligungen und Pausenmodus verwalten"
     },
     "errors": {
       "email_taken": "Diese E-Mail ist bereits registriert.",
@@ -140,6 +167,8 @@
       "under_minimum_age": "Für die App ist ein Mindestalter von 16 Jahren erforderlich.",
       "target_weight_bmi_too_low": "Das Zielgewicht wäre bei deiner Größe gesundheitlich zu niedrig (BMI < 18,5).",
       "validation_failed": "Bitte prüfe deine Angaben.",
+      "core_consent_required": "Ohne Einwilligung in die Kernfunktion ist die App nicht nutzbar.",
+      "core_consent_immutable": "Die Einwilligung in die Kernfunktion kann nicht widerrufen werden.",
       "unknown_error": "Etwas ist schiefgelaufen. Bitte versuch es erneut."
     }
   },
@@ -194,6 +223,12 @@
     "offline": {
       "pending": "{count} Eintrag/Einträge wartet/warten auf Verbindung",
       "synced": "Synchronisiert"
+    },
+    "wellbeing": {
+      "title": "Kurze Pause von der Kalorienanzeige",
+      "message": "Wir haben ein Muster erkannt, das gerade nicht so guttut. Die Kalorienanzeige ist fuer diese Tage ausgeblendet -- das Zaehlen kommt zurueck, sobald du magst. Weiter Essen loggen geht ganz normal.",
+      "resourcesIntro": "Falls du reden moechtest, sind diese Anlaufstellen fuer dich da (offizielle Webseite selbst suchen):",
+      "pauseHint": "Du kannst das Tracken auch ganz pausieren -- in den Datenschutz-Einstellungen."
     },
     "errors": {
       "unknown_error": "Etwas ist schiefgelaufen. Bitte versuch es erneut."
@@ -440,6 +475,34 @@
     "nutriscore": "Nutri-Score {grade}",
     "errors": {
       "unknown_error": "Etwas ist schiefgelaufen. Bitte versuch es erneut."
+    }
+  },
+  "Settings": {
+    "privacy": {
+      "title": "Datenschutz & Pausenmodus",
+      "consentsTitle": "Einwilligungen verwalten",
+      "consentsHint": "Jeder Zweck ausser der Kernfunktion laesst sich jederzeit an- oder abwaehlen.",
+      "purpose": {
+        "core": "Kernfunktion",
+        "photo_ai": "Foto-KI-Verarbeitung",
+        "wearable_sync": "Wearable-Sync",
+        "analytics": "Anonymisierte Produktanalyse",
+        "marketing": "Marketing"
+      },
+      "granted": "Erteilt",
+      "notGranted": "Nicht erteilt",
+      "grant": "Erteilen",
+      "revoke": "Widerrufen",
+      "coreLocked": "Voraussetzung fuer die Nutzung der App, nicht widerrufbar.",
+      "pauseTitle": "Pausenmodus",
+      "pauseDescription": "Eine Weile nicht tracken? Deine Daten bleiben vollstaendig erhalten, es gibt keine Erinnerungen waehrend der Pause.",
+      "pauseActive": "Tracking pausiert seit {date, date, medium}",
+      "pauseInactive": "Tracking laeuft.",
+      "pauseButton": "Tracking pausieren",
+      "resumeButton": "Tracking fortsetzen",
+      "errors": {
+        "unknown_error": "Etwas ist schiefgelaufen. Bitte versuch es erneut."
+      }
     }
   }
 }

@@ -81,6 +81,14 @@ class WorkoutSessionRepository(private val jdbcTemplate: JdbcTemplate) {
     fun findAllForUser(userId: UUID): List<WorkoutSession> =
         jdbcTemplate.query("$SELECT_SQL WHERE user_id = ? ORDER BY started_at", rowMapper, userId)
 
+    /** LEGAL-12 (Wellbeing-Muster-Erkennung, Epic #12): Anzahl begonnener Workouts seit [since],
+     * unabhaengig davon ob beendet -- ein exzessives Trainingsmuster zeigt sich schon im Beginnen. */
+    fun countStartedSince(userId: UUID, since: Instant): Int =
+        jdbcTemplate.queryForObject(
+            "SELECT count(*) FROM workout_sessions WHERE user_id = ? AND started_at >= ?",
+            Int::class.java, userId, Timestamp.from(since),
+        ) ?: 0
+
     fun findHistory(userId: UUID, limit: Int): List<WorkoutSession> =
         jdbcTemplate.query(
             "$SELECT_SQL WHERE user_id = ? AND finished_at IS NOT NULL ORDER BY started_at DESC LIMIT ?",

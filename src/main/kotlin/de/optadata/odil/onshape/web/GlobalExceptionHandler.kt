@@ -2,6 +2,8 @@ package de.optadata.odil.onshape.web
 
 import de.optadata.odil.onshape.auth.EmailAlreadyRegisteredException
 import de.optadata.odil.onshape.auth.InvalidCredentialsException
+import de.optadata.odil.onshape.legal.CoreConsentImmutableException
+import de.optadata.odil.onshape.legal.CoreConsentRequiredException
 import de.optadata.odil.onshape.onboarding.GoalRateExceededException
 import de.optadata.odil.onshape.onboarding.TargetWeightBmiTooLowException
 import de.optadata.odil.onshape.onboarding.UnderMinimumAgeException
@@ -33,6 +35,14 @@ class GlobalExceptionHandler {
     @ExceptionHandler(TargetWeightBmiTooLowException::class)
     fun handleTargetWeightBmiTooLow(e: TargetWeightBmiTooLowException) =
         ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ApiError("target_weight_bmi_too_low", e.message ?: "target weight bmi too low"))
+
+    @ExceptionHandler(CoreConsentRequiredException::class)
+    fun handleCoreConsentRequired(e: CoreConsentRequiredException) =
+        ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ApiError("core_consent_required", e.message ?: "core consent required"))
+
+    @ExceptionHandler(CoreConsentImmutableException::class)
+    fun handleCoreConsentImmutable(e: CoreConsentImmutableException) =
+        ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ApiError("core_consent_immutable", e.message ?: "core consent immutable"))
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleValidation(e: MethodArgumentNotValidException): ResponseEntity<ApiError> {

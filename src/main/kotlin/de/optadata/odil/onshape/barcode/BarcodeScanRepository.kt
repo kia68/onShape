@@ -4,6 +4,7 @@ import org.postgresql.util.PGobject
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.stereotype.Repository
 import tools.jackson.databind.ObjectMapper
+import java.sql.Timestamp
 import java.time.Instant
 import java.util.UUID
 
@@ -32,6 +33,15 @@ class BarcodeScanRepository(
             UUID::class.java,
             userId, barcode, foodId, found, fitScore, breakdown?.let { it.toJsonb() },
         ) ?: error("Insert into barcode_scans returned no id")
+
+    /** BIZ-01: fuer den Fit-Score-Monatsdeckel im Free-Tier (siehe TierPolicy-KDoc). Zaehlt nur
+     * gefundene Produkte -- ein "nicht gefunden"-Scan hat gar keinen Fit-Score, der geloggt
+     * werden koennte, siehe [de.optadata.odil.onshape.barcode.BarcodeScanService]. */
+    fun countFoundSince(userId: UUID, since: Instant): Int =
+        jdbcTemplate.queryForObject(
+            "SELECT count(*) FROM barcode_scans WHERE user_id = ? AND found AND scanned_at >= ?",
+            Int::class.java, userId, Timestamp.from(since),
+        ) ?: 0
 
     fun findRecent(userId: UUID, limit: Int): List<BarcodeScan> =
         jdbcTemplate.query(

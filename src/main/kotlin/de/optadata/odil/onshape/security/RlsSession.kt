@@ -32,4 +32,15 @@ class RlsSession(private val jdbcTemplate: JdbcTemplate) {
         jdbcTemplate.execute("SET LOCAL app.auth_lookup = 'on'")
         return block()
     }
+
+    /**
+     * Ausschliesslich fuer Zugriffe auf `subscriptions` ohne (bzw. quer ueber) Nutzerkontext:
+     * Stripe-Webhooks (nur eine Stripe-ID im Event, kein eingeloggter Request) und der
+     * Lifetime-Deal-Deckel (muss ALLE Nutzer zaehlen, siehe V17-Kommentar).
+     */
+    @Transactional
+    fun <T> asSystemLookup(block: () -> T): T {
+        jdbcTemplate.execute("SET LOCAL app.system_lookup = 'on'")
+        return block()
+    }
 }

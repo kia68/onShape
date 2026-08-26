@@ -1,5 +1,7 @@
 package de.optadata.odil.onshape.progress
 
+import de.optadata.odil.onshape.billing.SubscriptionService
+import de.optadata.odil.onshape.billing.TierPolicy
 import de.optadata.odil.onshape.nutrition.FoodEntryRepository
 import de.optadata.odil.onshape.onboarding.BodyMeasurementRepository
 import de.optadata.odil.onshape.onboarding.NutritionTargetRepository
@@ -20,6 +22,7 @@ class ProgressService(
     private val nutritionTargetRepository: NutritionTargetRepository,
     private val profileRepository: ProfileRepository,
     private val workoutSetRepository: WorkoutSetRepository,
+    private val subscriptionService: SubscriptionService,
     private val rlsSession: RlsSession,
 ) {
 
@@ -63,10 +66,17 @@ class ProgressService(
     }
 
     /** FR-133: tatsaechlich geloggtes Volumen je Woche/Muskel, verglichen mit dem Zielkorridor
-     * aus dem Profil (Erfahrung/Alter, siehe [VolumeCorridor]). */
+     * aus dem Profil (Erfahrung/Alter, siehe [VolumeCorridor]). BIZ-01 (§15.1 "Volumen-
+     * Analytics: Basis" im Free-Tier): `from` wird auf die letzten N Wochen VOR HEUTE geklemmt
+     * (nicht relativ zum angefragten `to` -- ein Free-Nutzer sieht ein rollendes Fenster der
+     * juengsten Vergangenheit, unabhaengig davon, welchen Bereich das Frontend anfragt), siehe
+     * [TierPolicy.volumeHistoryWindowWeeks]. */
     fun volumeHistory(userId: UUID, from: LocalDate, to: LocalDate, today: LocalDate = LocalDate.now()): List<WeeklyMuscleVolumeResponse> {
+        val windowWeeks = TierPolicy.volumeHistoryWindowWeeks(subscriptionService.currentTier(userId))
+        val clampedFrom = if (windowWeeks != null) maxOf(from, today.minusWeeks(windowWeeks.toLong())) else from
+
         val (profile, volume) = rlsSession.asUser(userId) {
-            profileRepository.findByUserId(userId) to workoutSetRepository.findWeeklyMuscleVolume(userId, from, to)
+            profileRepository.findByUserId(userId) to workoutSetRepository.findWeeklyMuscleVolume(userId, clampedFrom, to)
         }
         val corridor = profile?.let { VolumeCorridor.forProfile(it.experience, Period.between(it.birthDate, today).years) }
         return volume.map {

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { ApiError } from "@/lib/api";
+import { Link } from "@/i18n/navigation";
 import {
   fetchConsents,
   fetchPauseStatus,
@@ -85,7 +86,12 @@ export function PrivacySettings() {
 
   return (
     <div className="mx-auto flex w-full max-w-xl flex-col gap-6 p-6">
-      <h1 className="text-xl font-semibold">{t("title")}</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-semibold">{t("title")}</h1>
+        <Link href="/settings/billing" className="text-sm text-muted-foreground underline underline-offset-4">
+          {t("billingLink")}
+        </Link>
+      </div>
 
       {error && <p className="text-sm text-destructive">{error}</p>}
 

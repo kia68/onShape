@@ -35,13 +35,16 @@ class ProgressControllerIntegrationTest : AbstractIntegrationTest() {
 
     private fun bearer(token: String) = "Bearer $token"
 
-    private fun registerAndOnboard(): String {
+    private fun registerAndOnboard(): String = registerAndOnboardReturningUserId().first
+
+    private fun registerAndOnboardReturningUserId(): Pair<String, UUID> {
         val email = "progress-test-${System.nanoTime()}@example.test"
         val registerResponse = mockMvc.perform(
             post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(RegisterRequest(email, "correct-horse-1", "de"))),
         ).andReturn().response.contentAsString
-        val token = objectMapper.readValue(registerResponse, AuthResponse::class.java).token
+        val auth = objectMapper.readValue(registerResponse, AuthResponse::class.java)
+        val token = auth.token
 
         mockMvc.perform(
             put("/api/onboarding/profile").header(HttpHeaders.AUTHORIZATION, bearer(token))
@@ -58,7 +61,7 @@ class ProgressControllerIntegrationTest : AbstractIntegrationTest() {
                     ),
                 ),
         ).andExpect(status().isOk)
-        return token
+        return token to auth.userId
     }
 
     private fun seedFood(nameDe: String, kcal: Double): UUID =
@@ -151,6 +154,35 @@ class ProgressControllerIntegrationTest : AbstractIntegrationTest() {
         assertEquals(1.0, quads.get("sets").asDouble(), 0.001)
         assertEquals(12, quads.get("corridorMin").asInt())
         assertEquals(16, quads.get("corridorMax").asInt())
+    }
+
+    /** BIZ-01 (§15.1 "Volumen-Analytics: Basis" im Free-Tier, siehe TierPolicy-KDoc). Direktes
+     * SQL statt ueber die Trainings-API, um einen Satz gezielt ausserhalb des 4-Wochen-Fensters
+     * zu platzieren -- die API selbst loggt immer mit `now()`. */
+    @Test
+    fun `volumen-historie im free-tier ignoriert saetze aelter als vier wochen`() {
+        val (token, userId) = registerAndOnboardReturningUserId()
+        val exerciseId = UUID.fromString(
+            objectMapper.readTree(
+                mockMvc.perform(get("/api/training/exercises").header(HttpHeaders.AUTHORIZATION, bearer(token))).andReturn().response.contentAsString,
+            ).first { it.get("slug").asText() == "bodyweight-squat" }.get("id").asText(),
+        )
+
+        val sessionId = jdbcTemplate.queryForObject(
+            "INSERT INTO workout_sessions (user_id, started_at) VALUES (?, now() - interval '10 weeks') RETURNING id",
+            UUID::class.java, userId,
+        )
+        jdbcTemplate.update(
+            "INSERT INTO workout_sets (session_id, exercise_id, set_index, reps, logged_at) VALUES (?, ?, 0, 10, now() - interval '10 weeks')",
+            sessionId, exerciseId,
+        )
+
+        val response = mockMvc.perform(
+            get("/api/progress/volume").param("from", "2020-01-01").param("to", "2030-01-01")
+                .header(HttpHeaders.AUTHORIZATION, bearer(token)),
+        ).andExpect(status().isOk).andReturn().response.contentAsString
+        val entries = objectMapper.readTree(response)
+        assertTrue(entries.none { it.get("muscle").asText() == "quads" }, "10 Wochen alter Satz sollte im Free-Tier ausserhalb des Fensters liegen")
     }
 
     @Test

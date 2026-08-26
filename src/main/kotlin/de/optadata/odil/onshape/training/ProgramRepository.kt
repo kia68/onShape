@@ -52,6 +52,11 @@ class ProgramRepository(
         return programId
     }
 
+    /** BIZ-01: Gesamtzahl je Account (nicht nur aktive), fuer den Free-Tier-Deckel
+     * "1 aktiver Plan" (siehe TierPolicy-KDoc). */
+    fun countForUser(userId: UUID): Int =
+        jdbcTemplate.queryForObject("SELECT count(*) FROM programs WHERE user_id = ?", Int::class.java, userId) ?: 0
+
     fun findActiveByUser(userId: UUID): Program? {
         val programId = jdbcTemplate.query(
             "SELECT id FROM programs WHERE user_id = ? AND is_active LIMIT 1",

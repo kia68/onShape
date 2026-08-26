@@ -43,6 +43,9 @@ export interface BarcodeScanResult {
   dietaryPreferenceConflict: string | null;
   reasons: ScoreReason[];
   alternatives: AlternativeProduct[];
+  /** BIZ-01 (§15.1): Free-Tier-Monatsdeckel erreicht -- score/reasons/alternatives sind dann
+   * leer, allergenMatches/dietaryPreferenceConflict bleiben davon unberuehrt. */
+  fitScoreGated: boolean;
 }
 
 export function scanBarcode(barcode: string, date: string) {

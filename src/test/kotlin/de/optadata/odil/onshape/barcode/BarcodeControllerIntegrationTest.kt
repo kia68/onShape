@@ -168,6 +168,40 @@ class BarcodeControllerIntegrationTest : AbstractIntegrationTest() {
             .andExpect(jsonPath("$.product.trust").value("community"))
     }
 
+    /** BIZ-01 (§15.1 "Fit-Score & Kaufberatung: 10 Scans/Monat" im Free-Tier). Scanning selbst
+     * bleibt unbegrenzt (`found` immer true), nur Score/Begruendung/Alternativen verschwinden
+     * ab dem 11. gefundenen Scan im Kalendermonat -- ein erkannter Allergen-Treffer bliebe davon
+     * unberuehrt (siehe BarcodeScanService-KDoc), hier nicht extra getestet, da bereits durch
+     * "allergen im nutzerprofil..." separat abgedeckt. */
+    @Test
+    fun `fit-score wird nach 10 gefundenen scans im monat fuer den free-tier gegated`() {
+        val token = registerAndGetToken()
+        completeOnboarding(token)
+
+        repeat(10) { i ->
+            val barcode = "5500000${i.toString().padStart(3, '0')}${(1000..9999).random()}"
+            seedFood(barcode, "Quota-Produkt-$i")
+            mockMvc.perform(
+                post("/api/barcode/scan").header(HttpHeaders.AUTHORIZATION, bearer(token))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(mapOf("barcode" to barcode, "date" to "2026-03-01"))),
+            ).andExpect(status().isOk).andExpect(jsonPath("$.fitScoreGated").value(false))
+        }
+
+        val eleventhBarcode = "5500000011${(1000..9999).random()}"
+        seedFood(eleventhBarcode, "Elftes Produkt")
+        mockMvc.perform(
+            post("/api/barcode/scan").header(HttpHeaders.AUTHORIZATION, bearer(token))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(mapOf("barcode" to eleventhBarcode, "date" to "2026-03-01"))),
+        )
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.found").value(true))
+            .andExpect(jsonPath("$.fitScoreGated").value(true))
+            .andExpect(jsonPath("$.score").doesNotExist())
+            .andExpect(jsonPath("$.alternatives").isEmpty)
+    }
+
     @Test
     fun `scan ohne abgeschlossenes onboarding funktioniert mit neutralem kontext`() {
         val token = registerAndGetToken()

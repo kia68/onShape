@@ -8,7 +8,7 @@ import { AddProductForm } from "./AddProductForm";
 import { BarcodeScanner } from "./BarcodeScanner";
 import { ScanResult } from "./ScanResult";
 
-type FoundResult = BarcodeScanResult & { found: true; product: NonNullable<BarcodeScanResult["product"]>; score: number };
+type FoundResult = BarcodeScanResult & { found: true; product: NonNullable<BarcodeScanResult["product"]> };
 
 export function BarcodeScanPage() {
   const t = useTranslations("Barcode");

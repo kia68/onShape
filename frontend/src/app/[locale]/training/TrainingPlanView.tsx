@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import { ApiError } from "@/lib/api";
 import {
@@ -35,6 +36,7 @@ export function TrainingPlanView({ locale }: { locale: string }) {
   const [generating, setGenerating] = useState(false);
   const [swappingId, setSwappingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [planLimitExceeded, setPlanLimitExceeded] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -75,12 +77,17 @@ export function TrainingPlanView({ locale }: { locale: string }) {
   const handleGenerate = async () => {
     setGenerating(true);
     setError(null);
+    setPlanLimitExceeded(false);
     try {
       const created = await generateProgram(weeksInput);
       setProgram(created);
       setSelectedWeek(1);
-    } catch {
-      setError(t("errors.unknown_error"));
+    } catch (e) {
+      if (e instanceof ApiError && e.code === "program_limit_exceeded") {
+        setPlanLimitExceeded(true);
+      } else {
+        setError(t("errors.unknown_error"));
+      }
     } finally {
       setGenerating(false);
     }
@@ -110,6 +117,14 @@ export function TrainingPlanView({ locale }: { locale: string }) {
         <h1 className="text-2xl font-semibold">{t("title")}</h1>
         <p className="text-sm text-muted-foreground">{t("noPlan")}</p>
         {error && <p className="text-sm text-destructive">{error}</p>}
+        {planLimitExceeded && (
+          <p className="text-sm text-amber-600">
+            {t("errors.program_limit_exceeded")}{" "}
+            <Link href="/pricing" className="underline underline-offset-4">
+              {t("errors.upgradeLink")}
+            </Link>
+          </p>
+        )}
         <label className="flex flex-col gap-1.5 text-sm">
           <span className="font-medium">{t("weeksLabel")}</span>
           <input

@@ -40,7 +40,9 @@ class SecurityConfig(
             .exceptionHandling { it.authenticationEntryPoint(HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)) }
             .authorizeHttpRequests { auth ->
                 auth
-                    .requestMatchers("/api/auth/**", "/actuator/health").permitAll()
+                    // /api/billing/webhook: Stripe ruft ohne JWT auf, die Stripe-Signature-Pruefung
+                    // im Controller uebernimmt die Authentifizierung (BIZ-02).
+                    .requestMatchers("/api/auth/**", "/actuator/health", "/api/billing/webhook").permitAll()
                     .anyRequest().authenticated()
             }
             .addFilterBefore(

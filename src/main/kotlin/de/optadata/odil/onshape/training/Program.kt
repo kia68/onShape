@@ -60,3 +60,8 @@ data class NewProgram(
     val generationContext: Map<String, Any?>?,
     val days: List<NewProgramDay>,
 )
+
+/** BIZ-01 (§15.1 "Trainingsplan-Generator: 1 aktiver Plan" im Free-Tier), siehe
+ * [de.optadata.odil.onshape.billing.TierPolicy.canCreateProgram] fuer die Interpretation. */
+class ProgramLimitExceededException :
+    RuntimeException("Free-Tier erlaubt nur ein erstelltes Programm -- auf Plus/Coach upgraden fuer weitere")

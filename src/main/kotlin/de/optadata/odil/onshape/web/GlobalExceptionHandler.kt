@@ -2,11 +2,16 @@ package de.optadata.odil.onshape.web
 
 import de.optadata.odil.onshape.auth.EmailAlreadyRegisteredException
 import de.optadata.odil.onshape.auth.InvalidCredentialsException
+import de.optadata.odil.onshape.billing.BillingNotConfiguredException
+import de.optadata.odil.onshape.billing.InvalidWebhookSignatureException
+import de.optadata.odil.onshape.billing.LifetimeCapReachedException
+import de.optadata.odil.onshape.billing.NoStripeCustomerException
 import de.optadata.odil.onshape.legal.CoreConsentImmutableException
 import de.optadata.odil.onshape.legal.CoreConsentRequiredException
 import de.optadata.odil.onshape.onboarding.GoalRateExceededException
 import de.optadata.odil.onshape.onboarding.TargetWeightBmiTooLowException
 import de.optadata.odil.onshape.onboarding.UnderMinimumAgeException
+import de.optadata.odil.onshape.training.ProgramLimitExceededException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.MethodArgumentNotValidException
@@ -43,6 +48,26 @@ class GlobalExceptionHandler {
     @ExceptionHandler(CoreConsentImmutableException::class)
     fun handleCoreConsentImmutable(e: CoreConsentImmutableException) =
         ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ApiError("core_consent_immutable", e.message ?: "core consent immutable"))
+
+    @ExceptionHandler(ProgramLimitExceededException::class)
+    fun handleProgramLimitExceeded(e: ProgramLimitExceededException) =
+        ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ApiError("program_limit_exceeded", e.message ?: "program limit exceeded"))
+
+    @ExceptionHandler(BillingNotConfiguredException::class)
+    fun handleBillingNotConfigured(e: BillingNotConfiguredException) =
+        ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(ApiError("billing_not_configured", e.message ?: "billing not configured"))
+
+    @ExceptionHandler(LifetimeCapReachedException::class)
+    fun handleLifetimeCapReached(e: LifetimeCapReachedException) =
+        ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ApiError("lifetime_cap_reached", e.message ?: "lifetime cap reached"))
+
+    @ExceptionHandler(NoStripeCustomerException::class)
+    fun handleNoStripeCustomer(e: NoStripeCustomerException) =
+        ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ApiError("no_stripe_customer", e.message ?: "no stripe customer"))
+
+    @ExceptionHandler(InvalidWebhookSignatureException::class)
+    fun handleInvalidWebhookSignature(e: InvalidWebhookSignatureException) =
+        ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ApiError("invalid_webhook_signature", e.message ?: "invalid webhook signature"))
 
     @ExceptionHandler(MethodArgumentNotValidException::class)
     fun handleValidation(e: MethodArgumentNotValidException): ResponseEntity<ApiError> {

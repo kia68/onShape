@@ -59,22 +59,28 @@ data class BarcodeScanResponse(
     val dietaryPreferenceConflict: String?,
     val reasons: List<ReasonResponse>,
     val alternatives: List<AlternativeResponse>,
+    /** BIZ-01: true = Free-Tier-Monatsdeckel erreicht, `score`/`reasons`/`alternatives` sind
+     * deshalb leer -- `allergenMatches`/`dietaryPreferenceConflict` bleiben davon UNBERUEHRT
+     * (siehe BarcodeScanService-KDoc). */
+    val fitScoreGated: Boolean,
 )
 
 fun BarcodeScanOutcome.toResponse(): BarcodeScanResponse = when (this) {
     is BarcodeScanOutcome.NotFound -> BarcodeScanResponse(
         found = false, barcode = barcode, product = null, score = null,
         allergenMatches = emptyList(), dietaryPreferenceConflict = null, reasons = emptyList(), alternatives = emptyList(),
+        fitScoreGated = false,
     )
     is BarcodeScanOutcome.Found -> BarcodeScanResponse(
         found = true,
         barcode = product.barcode ?: "",
         product = product.toResponse(),
-        score = fitScore.score,
+        score = if (fitScoreGated) null else fitScore.score,
         allergenMatches = fitScore.allergenMatches,
         dietaryPreferenceConflict = fitScore.dietaryPreferenceConflict,
-        reasons = fitScore.reasons.map { it.toResponse() },
-        alternatives = alternatives.map { it.toResponse() },
+        reasons = if (fitScoreGated) emptyList() else fitScore.reasons.map { it.toResponse() },
+        alternatives = if (fitScoreGated) emptyList() else alternatives.map { it.toResponse() },
+        fitScoreGated = fitScoreGated,
     )
 }
 

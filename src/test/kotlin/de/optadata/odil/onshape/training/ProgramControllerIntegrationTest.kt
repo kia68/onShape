@@ -238,6 +238,22 @@ class ProgramControllerIntegrationTest : AbstractIntegrationTest() {
         ).andExpect(status().isUnprocessableEntity)
     }
 
+    /** BIZ-01 (§15.1 "Trainingsplan-Generator: 1 aktiver Plan" im Free-Tier). Frisch registrierte
+     * Nutzer ohne Abo sind FREE (siehe SubscriptionService). */
+    @Test
+    fun `free-tier darf nur ein programm erstellen, zweite generierung wird geblockt`() {
+        val token = registerOnboardedUser()
+        mockMvc.perform(
+            post("/api/training/programs/generate").header(HttpHeaders.AUTHORIZATION, bearer(token))
+                .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(mapOf("weeks" to 4))),
+        ).andExpect(status().isCreated)
+
+        mockMvc.perform(
+            post("/api/training/programs/generate").header(HttpHeaders.AUTHORIZATION, bearer(token))
+                .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(mapOf("weeks" to 4))),
+        ).andExpect(status().isUnprocessableEntity).andExpect(jsonPath("$.code").value("program_limit_exceeded"))
+    }
+
     private fun countOccurrences(program: tools.jackson.databind.JsonNode, exerciseId: String): Int =
         program.get("days").sumOf { day -> day.get("items").count { it.get("exerciseId").asText() == exerciseId } }
 }

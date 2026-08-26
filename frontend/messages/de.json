@@ -289,7 +289,9 @@
     },
     "errors": {
       "no_alternative": "Keine Alternative mit deinem Equipment verfügbar.",
-      "unknown_error": "Etwas ist schiefgelaufen. Bitte versuch es erneut."
+      "unknown_error": "Etwas ist schiefgelaufen. Bitte versuch es erneut.",
+      "program_limit_exceeded": "Free-Tier erlaubt nur ein erstelltes Programm.",
+      "upgradeLink": "Auf Plus/Coach upgraden für weitere Pläne"
     }
   },
   "TrainingLog": {
@@ -445,6 +447,11 @@
       "medium": "Teils passend",
       "poor": "Eher nicht für heute"
     },
+    "fitScoreGated": {
+      "title": "Monatslimit für Fit-Score & Kaufberatung erreicht",
+      "message": "Der Barcode-Scanner selbst bleibt unbegrenzt kostenlos — Fit-Score, Begründung und Alternativen gibt es im Free-Tier bis zu 10× im Monat, ab nächstem Monat wieder frei.",
+      "upgradeLink": "Jetzt upgraden für unbegrenzten Fit-Score"
+    },
     "allergenWarning": "⚠ Enthält {allergen} — steht in deinem Profil als Allergen.",
     "dietaryConflict": "⚠ Passt nicht zu deiner Ernährungspräferenz ({preference}).",
     "reasons": {
@@ -480,6 +487,7 @@
   "Settings": {
     "privacy": {
       "title": "Datenschutz & Pausenmodus",
+      "billingLink": "Abo & Rechnung",
       "consentsTitle": "Einwilligungen verwalten",
       "consentsHint": "Jeder Zweck ausser der Kernfunktion laesst sich jederzeit an- oder abwaehlen.",
       "purpose": {
@@ -503,6 +511,107 @@
       "errors": {
         "unknown_error": "Etwas ist schiefgelaufen. Bitte versuch es erneut."
       }
+    },
+    "billing": {
+      "title": "Abo & Rechnung",
+      "currentPlan": "Aktueller Plan",
+      "tier": {
+        "free": "Free",
+        "plus": "Plus",
+        "coach": "Coach"
+      },
+      "period": {
+        "monthly": "monatlich",
+        "yearly": "jaehrlich",
+        "lifetime": "lebenslang"
+      },
+      "lifetimeBadge": "Lifetime-Zugang",
+      "manageButton": "Abo verwalten (Stripe)",
+      "viewPlansLink": "Alle Plaene ansehen",
+      "errors": {
+        "billing_not_configured": "Zahlungen sind in dieser Umgebung noch nicht eingerichtet.",
+        "no_stripe_customer": "Noch kein Kauf abgeschlossen.",
+        "unknown_error": "Etwas ist schiefgelaufen. Bitte versuch es erneut."
+      }
     }
+  },
+  "Pricing": {
+    "title": "Plaene & Preise",
+    "subtitle": "Ein Abo statt zwei, fuer einen Bruchteil des Preises von MyFitnessPal + Hevy zusammen.",
+    "billingToggle": {
+      "monthly": "Monatlich",
+      "yearly": "Jaehrlich"
+    },
+    "tier": {
+      "free": {
+        "name": "Free",
+        "price": "0 €",
+        "cta": "Kostenlos starten"
+      },
+      "plus": {
+        "name": "Plus",
+        "priceMonthly": "3,99 €/Mon.",
+        "priceYearly": "29,99 €/Jahr",
+        "cta": "Plus waehlen"
+      },
+      "coach": {
+        "name": "Coach",
+        "priceMonthly": "7,99 €/Mon.",
+        "priceYearly": "69,99 €/Jahr",
+        "cta": "Coach waehlen"
+      }
+    },
+    "features": {
+      "foodLogging": "Lebensmittel-Logging: unbegrenzt",
+      "barcodeScanner": "Barcode-Scanner: unbegrenzt, immer kostenlos",
+      "fitScore": "Fit-Score & Kaufberatung",
+      "fitScoreFree": "10 Scans/Monat",
+      "fitScoreUnlimited": "unbegrenzt",
+      "micronutrients": "Mikronaehrstoffe",
+      "micronutrientsBasis": "Basis (5)",
+      "micronutrientsFull": "vollstaendig",
+      "trainingPlans": "Trainingsplan-Generator",
+      "trainingPlansFree": "1 erstelltes Programm",
+      "trainingPlansUnlimited": "unbegrenzt neu generieren",
+      "volumeAnalytics": "Volumen-Analytics",
+      "volumeAnalyticsBasis": "letzte 4 Wochen",
+      "volumeAnalyticsFull": "vollstaendige Historie",
+      "dataExport": "Datenexport (DSGVO Art. 20): immer kostenlos",
+      "noAds": "Keine Werbung. Niemals."
+    },
+    "lifetime": {
+      "title": "Lifetime-Deal",
+      "price": "129 €",
+      "description": "Einmalzahlung, dauerhaft voller Coach-Zugang -- gedeckelt auf die ersten 5.000 Nutzer.",
+      "cta": "Lifetime sichern"
+    },
+    "loginRequired": "Zum Kauf bitte zuerst registrieren oder anmelden.",
+    "errors": {
+      "billing_not_configured": "Zahlungen sind in dieser Umgebung noch nicht eingerichtet.",
+      "lifetime_cap_reached": "Das Lifetime-Kontingent ist ausgeschoepft.",
+      "unknown_error": "Etwas ist schiefgelaufen. Bitte versuch es erneut."
+    }
+  },
+  "Switch": {
+    "title": "Von MyFitnessPal gewechselt? Willkommen.",
+    "subtitle": "Alles, was dich an MyFitnessPal genervt hat -- gelöst.",
+    "complaints": {
+      "barcodePaywall": {
+        "complaint": "\"Barcode-Scanner hinter der Paywall (seit 2022).\"",
+        "answer": "Bei uns fuer immer kostenlos, in jedem Tier."
+      },
+      "entryLimit": {
+        "complaint": "\"Nur 5 Lebensmittel pro Tag im Free-Tier.\"",
+        "answer": "Unbegrenztes Logging, auch im Free-Tier."
+      },
+      "ads": {
+        "complaint": "\"Aggressive Werbung zwischen Aktionen.\"",
+        "answer": "Keine Werbung. Niemals."
+      }
+    },
+    "importTitle": "Dein Verlauf kommt mit",
+    "importDescription": "Hevy- und Strong-Exporte lassen sich direkt importieren -- Trainingshistorie inklusive.",
+    "importCta": "Jetzt importieren",
+    "pricingLink": "Plaene ansehen"
   }
 }

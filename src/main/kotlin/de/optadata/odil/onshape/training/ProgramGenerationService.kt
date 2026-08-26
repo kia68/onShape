@@ -1,5 +1,7 @@
 package de.optadata.odil.onshape.training
 
+import de.optadata.odil.onshape.billing.SubscriptionService
+import de.optadata.odil.onshape.billing.TierPolicy
 import de.optadata.odil.onshape.onboarding.ProfileRepository
 import de.optadata.odil.onshape.security.RlsSession
 import org.springframework.http.HttpStatus
@@ -16,10 +18,15 @@ class ProgramGenerationService(
     private val exerciseRepository: ExerciseRepository,
     private val exerciseFeedbackRepository: ExerciseFeedbackRepository,
     private val programRepository: ProgramRepository,
+    private val subscriptionService: SubscriptionService,
     private val rlsSession: RlsSession,
 ) {
 
     fun generateForUser(userId: UUID, weeks: Int, splitTypeOverride: String? = null, today: LocalDate = LocalDate.now()): ProgramResponse {
+        val tier = subscriptionService.currentTier(userId)
+        val alreadyCreated = rlsSession.asUser(userId) { programRepository.countForUser(userId) }
+        if (!TierPolicy.canCreateProgram(tier, alreadyCreated)) throw ProgramLimitExceededException()
+
         val profile = rlsSession.asUser(userId) { profileRepository.findByUserId(userId) }
             ?: throw ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "Onboarding noch nicht abgeschlossen")
         val age = Period.between(profile.birthDate, today).years

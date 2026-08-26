@@ -1,5 +1,7 @@
 package de.optadata.odil.onshape.training
 
+import de.optadata.odil.onshape.billing.SubscriptionService
+import de.optadata.odil.onshape.billing.TierPolicy
 import de.optadata.odil.onshape.onboarding.Goal
 import de.optadata.odil.onshape.security.RlsSession
 import de.optadata.odil.onshape.web.parseEnum
@@ -12,6 +14,7 @@ import java.util.UUID
 class ProgramQueryService(
     private val exerciseRepository: ExerciseRepository,
     private val programRepository: ProgramRepository,
+    private val subscriptionService: SubscriptionService,
     private val rlsSession: RlsSession,
 ) {
 
@@ -25,6 +28,10 @@ class ProgramQueryService(
      * VORAB geprueft, damit der Nutzer eine verstaendliche 422 statt eines rohen
      * Constraint-Verletzungs-Fehlers der DB sieht. */
     fun createManual(userId: UUID, request: ManualProgramRequest): ProgramResponse {
+        val tier = subscriptionService.currentTier(userId)
+        val alreadyCreated = rlsSession.asUser(userId) { programRepository.countForUser(userId) }
+        if (!TierPolicy.canCreateProgram(tier, alreadyCreated)) throw ProgramLimitExceededException()
+
         val goal = parseEnum(Goal.entries, request.goal, "goal")
         val validExerciseIds = exerciseRepository.findAll().map { it.id }.toSet()
         for (day in request.days) {

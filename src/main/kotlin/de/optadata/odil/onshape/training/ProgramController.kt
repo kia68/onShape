@@ -23,6 +23,7 @@ class ProgramController(
     private val programQueryService: ProgramQueryService,
     private val exerciseSwapService: ExerciseSwapService,
     private val volumeDashboardService: VolumeDashboardService,
+    private val deloadRecommendationService: DeloadRecommendationService,
 ) {
 
     /** FR-70/71/72/73. */
@@ -60,4 +61,9 @@ class ProgramController(
     @GetMapping("/active/volume")
     fun volumeDashboard(@RequestParam(required = false) week: Int?, authentication: Authentication): VolumeDashboardResponse =
         volumeDashboardService.forActiveProgram(authentication.currentUserId(), week).toResponse()
+
+    /** FR-79. */
+    @GetMapping("/active/deload-recommendation")
+    fun deloadRecommendation(authentication: Authentication): DeloadRecommendationResponse =
+        deloadRecommendationService.evaluate(authentication.currentUserId())
 }

@@ -244,6 +244,15 @@
     "splitSummary": "{splitType} · {daysPerWeek} Tage/Woche · {weeks} Wochen",
     "week": "Woche {week}",
     "deloadNotice": "Deload-Woche: reduziertes Volumen zur Erholung.",
+    "deloadRecommendation": {
+      "title": "Eine Erholungswoche (Deload) koennte jetzt helfen:",
+      "reason": {
+        "STAGNANT_PERFORMANCE": "Die Leistung stagniert seit mehreren Wochen bei mindestens einer Uebung.",
+        "MISSED_RIR_TARGET": "Die Saetze fallen zuletzt wiederholt leichter aus als geplant.",
+        "HIGH_EXHAUSTION": "Die zuletzt gemeldete Erschoepfung war hoch.",
+        "PROLONGED_CALORIE_DEFICIT": "Du befindest dich schon laenger in einem Kaloriendefizit."
+      }
+    },
     "split": {
       "full_body": "Ganzkörper",
       "upper_lower": "Oberkörper/Unterkörper",

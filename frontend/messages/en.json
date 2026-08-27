@@ -244,6 +244,15 @@
     "splitSummary": "{splitType} · {daysPerWeek} days/week · {weeks} weeks",
     "week": "Week {week}",
     "deloadNotice": "Deload week: reduced volume for recovery.",
+    "deloadRecommendation": {
+      "title": "A recovery week (deload) might help right now:",
+      "reason": {
+        "STAGNANT_PERFORMANCE": "Performance has stagnated for several weeks on at least one exercise.",
+        "MISSED_RIR_TARGET": "Sets have repeatedly come out easier than planned lately.",
+        "HIGH_EXHAUSTION": "Your recently reported exhaustion was high.",
+        "PROLONGED_CALORIE_DEFICIT": "You've been in a calorie deficit for a while now."
+      }
+    },
     "split": {
       "full_body": "Full body",
       "upper_lower": "Upper/lower",

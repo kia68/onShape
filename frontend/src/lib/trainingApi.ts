@@ -81,3 +81,20 @@ export function fetchVolumeDashboard(week: number) {
   const params = new URLSearchParams({ week: String(week) });
   return request<VolumeDashboard>(`/api/training/programs/active/volume?${params.toString()}`);
 }
+
+export type DeloadReason = "STAGNANT_PERFORMANCE" | "MISSED_RIR_TARGET" | "HIGH_EXHAUSTION" | "PROLONGED_CALORIE_DEFICIT";
+
+/** FR-79: reine Empfehlung, kein automatisches Eingreifen ins Programm. */
+export interface DeloadRecommendation {
+  recommended: boolean;
+  reasons: DeloadReason[];
+  stagnantExerciseCount: number;
+  rirMisses: number;
+  rirComparisonsTotal: number;
+  avgRecentPerceivedEffort: number | null;
+  weeksInCalorieDeficit: number;
+}
+
+export function fetchDeloadRecommendation() {
+  return request<DeloadRecommendation>("/api/training/programs/active/deload-recommendation");
+}

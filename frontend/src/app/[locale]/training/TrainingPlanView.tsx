@@ -8,9 +8,11 @@ import { Button } from "@/components/ui/button";
 import { ApiError } from "@/lib/api";
 import {
   fetchActiveProgram,
+  fetchDeloadRecommendation,
   fetchVolumeDashboard,
   generateProgram,
   swapExercise,
+  type DeloadRecommendation,
   type Program,
   type ProgramItem,
   type SwapReason,
@@ -30,6 +32,7 @@ export function TrainingPlanView({ locale }: { locale: string }) {
 
   const [program, setProgram] = useState<Program | null>(null);
   const [volume, setVolume] = useState<VolumeDashboard | null>(null);
+  const [deload, setDeload] = useState<DeloadRecommendation | null>(null);
   const [selectedWeek, setSelectedWeek] = useState(1);
   const [weeksInput, setWeeksInput] = useState(6);
   const [loading, setLoading] = useState(true);
@@ -73,6 +76,19 @@ export function TrainingPlanView({ locale }: { locale: string }) {
     }, 0);
     return () => clearTimeout(timer);
   }, [program, selectedWeek]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (!program) {
+        setDeload(null);
+        return;
+      }
+      fetchDeloadRecommendation()
+        .then(setDeload)
+        .catch(() => setDeload(null));
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [program]);
 
   const handleGenerate = async () => {
     setGenerating(true);
@@ -174,6 +190,17 @@ export function TrainingPlanView({ locale }: { locale: string }) {
           </button>
         ))}
       </div>
+      {/* FR-79 -- reine Empfehlung, kein automatischer Eingriff ins Programm. */}
+      {deload?.recommended && !isDeloadWeek && (
+        <div className="rounded-md border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-xs">
+          <p className="font-medium">{t("deloadRecommendation.title")}</p>
+          <ul className="mt-1 list-disc pl-4">
+            {deload.reasons.map((reason) => (
+              <li key={reason}>{t(`deloadRecommendation.reason.${reason}`)}</li>
+            ))}
+          </ul>
+        </div>
+      )}
       {isDeloadWeek && (
         <p className="rounded-md border border-amber-500/50 bg-amber-500/10 px-3 py-2 text-xs">{t("deloadNotice")}</p>
       )}

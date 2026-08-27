@@ -10,6 +10,8 @@ import java.util.UUID
 
 data class WeeklyMuscleVolume(val weekStart: LocalDate, val muscle: String, val sets: Double)
 
+data class RirComparison(val actualRir: Int, val targetRir: Int)
+
 /** Muss innerhalb von `RlsSession.asUser` laufen (`via_session`-Policy, V8) -- `workout_sets`
  * hat keine eigene `user_id`-Spalte, RLS prueft ueber `workout_sessions`. */
 @Repository
@@ -167,6 +169,25 @@ class WorkoutSetRepository(private val jdbcTemplate: JdbcTemplate) {
                 )
             },
             userId, from, to,
+        )
+
+    /** FR-79: geloggte Saetze mit sowohl tatsaechlichem als auch programmiertem Ziel-RIR fuer
+     * DIESELBE Uebung am zugehoerigen Plan-Tag -- der Join lauft ueber `program_day_id` (welcher
+     * Tag der Session zugrunde lag) UND `exercise_id` (welche Uebung an dem Tag), damit ein
+     * Ziel-RIR wirklich zur geloggten Uebung passt statt nur zufaellig am selben Tag zu stehen.
+     * Sessions ohne `program_day_id` (z.B. manuell gestartet ohne Plan) liefern keine Zeilen. */
+    fun findRecentRirComparisons(userId: UUID, since: Instant): List<RirComparison> =
+        jdbcTemplate.query(
+            """
+            SELECT ws.rir AS actual_rir, pi.target_rir
+            FROM workout_sets ws
+            JOIN workout_sessions s ON s.id = ws.session_id
+            JOIN program_items pi ON pi.program_day_id = s.program_day_id AND pi.exercise_id = ws.exercise_id
+            WHERE s.user_id = ? AND ws.completed AND NOT ws.is_warmup
+              AND ws.rir IS NOT NULL AND pi.target_rir IS NOT NULL AND ws.logged_at >= ?
+            """.trimIndent(),
+            { rs, _ -> RirComparison(rs.getInt("actual_rir"), rs.getInt("target_rir")) },
+            userId, Timestamp.from(since),
         )
 
     private val rowMapper = RowMapper { rs, _ ->

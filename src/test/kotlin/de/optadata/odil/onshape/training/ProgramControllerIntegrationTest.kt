@@ -256,4 +256,54 @@ class ProgramControllerIntegrationTest : AbstractIntegrationTest() {
 
     private fun countOccurrences(program: tools.jackson.databind.JsonNode, exerciseId: String): Int =
         program.get("days").sumOf { day -> day.get("items").count { it.get("exerciseId").asText() == exerciseId } }
+
+    @Test
+    fun `deload-empfehlung ohne aktiven plan liefert 404`() {
+        val token = registerOnboardedUser()
+        mockMvc.perform(get("/api/training/programs/active/deload-recommendation").header(HttpHeaders.AUTHORIZATION, bearer(token)))
+            .andExpect(status().isNotFound)
+    }
+
+    @Test
+    fun `deload-empfehlung ohne signale ist nicht empfohlen`() {
+        val token = registerOnboardedUser()
+        mockMvc.perform(
+            post("/api/training/programs/generate").header(HttpHeaders.AUTHORIZATION, bearer(token))
+                .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(mapOf("weeks" to 4))),
+        ).andExpect(status().isCreated)
+
+        mockMvc.perform(get("/api/training/programs/active/deload-recommendation").header(HttpHeaders.AUTHORIZATION, bearer(token)))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.recommended").value(false))
+            .andExpect(jsonPath("$.reasons").isEmpty)
+    }
+
+    @Test
+    fun `drei sessions mit hoher subjektiver erschoepfung empfehlen einen deload`() {
+        val token = registerOnboardedUser()
+        mockMvc.perform(
+            post("/api/training/programs/generate").header(HttpHeaders.AUTHORIZATION, bearer(token))
+                .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(mapOf("weeks" to 4))),
+        ).andExpect(status().isCreated)
+
+        repeat(3) {
+            val sessionId = objectMapper.readTree(
+                mockMvc.perform(
+                    post("/api/trainlog/sessions").header(HttpHeaders.AUTHORIZATION, bearer(token))
+                        .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(mapOf("programDayId" to null, "clientId" to null))),
+                ).andExpect(status().isCreated).andReturn().response.contentAsString,
+            ).get("id").asText()
+            mockMvc.perform(
+                org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put("/api/trainlog/sessions/$sessionId/finish")
+                    .header(HttpHeaders.AUTHORIZATION, bearer(token))
+                    .contentType(MediaType.APPLICATION_JSON).content(objectMapper.writeValueAsString(mapOf("perceivedEffort" to 10, "notes" to null))),
+            ).andExpect(status().isOk)
+        }
+
+        mockMvc.perform(get("/api/training/programs/active/deload-recommendation").header(HttpHeaders.AUTHORIZATION, bearer(token)))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.recommended").value(true))
+            .andExpect(jsonPath("$.reasons[0]").value("HIGH_EXHAUSTION"))
+            .andExpect(jsonPath("$.avgRecentPerceivedEffort").value(10.0))
+    }
 }

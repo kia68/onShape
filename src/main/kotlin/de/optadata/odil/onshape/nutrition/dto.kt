@@ -118,3 +118,32 @@ data class WaterEntryResponse(val id: UUID, val loggedDate: LocalDate, val amoun
 fun WaterEntry.toResponse() = WaterEntryResponse(id, loggedDate, amountMl, clientId)
 
 data class WaterDayResponse(val date: LocalDate, val totalMl: Int, val entries: List<WaterEntryResponse>)
+
+// ---- FR-27: Rezept-Import per URL -------------------------------------------------------
+
+data class RecipeImportRequest(@field:NotBlank val url: String)
+
+data class ParsedIngredientResponse(
+    val rawText: String,
+    val quantity: Double?,
+    val unit: String?,
+    val ingredientName: String,
+    /** Vorbelegter Gramm-Wert, nur bei g/kg/ml/l gesetzt (siehe IngredientLineParser-KDoc) --
+     * sonst muss der Nutzer die Menge manuell eintragen, bevor er dieses Rezept ueber
+     * `POST /api/nutrition/recipes` tatsaechlich anlegt. */
+    val gramsResolved: Double?,
+    val suggestions: List<FoodSearchResultResponse>,
+)
+
+/** Ergebnis eines Imports ist ein ENTWURF, keine gespeicherte Ressource -- der Nutzer waehlt
+ * pro Zutat die passende Lebensmittel-Uebereinstimmung (oder traegt sie manuell nach) und
+ * legt das Rezept dann ganz normal ueber `POST /api/nutrition/recipes` an (`recipe_items`
+ * braucht zwingend `food_id` + `grams`, V3__nutrition_log.sql -- ein automatischer Import kann
+ * das nicht fuer jede Zutat garantieren). */
+data class RecipeImportDraftResponse(
+    val name: String,
+    val servings: Double,
+    val instructions: String?,
+    val sourceUrl: String,
+    val ingredients: List<ParsedIngredientResponse>,
+)

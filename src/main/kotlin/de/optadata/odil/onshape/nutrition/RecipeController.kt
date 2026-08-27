@@ -10,13 +10,17 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 import java.util.UUID
 
 /** FR-26: eigene Rezepte, Naehrwerte pro Portion skaliert aus den Zutaten. */
 @RestController
 @RequestMapping("/api/nutrition/recipes")
-class RecipeController(private val recipeService: RecipeService) {
+class RecipeController(
+    private val recipeService: RecipeService,
+    private val recipeImportService: RecipeImportService,
+) {
 
     @PostMapping
     fun create(@Valid @RequestBody request: CreateRecipeRequest, authentication: Authentication): ResponseEntity<RecipeResponse> {
@@ -26,6 +30,15 @@ class RecipeController(private val recipeService: RecipeService) {
         )
         return ResponseEntity.status(HttpStatus.CREATED).body(result.toResponse())
     }
+
+    /** FR-27: liefert einen Entwurf zum Nachbearbeiten, siehe [RecipeImportDraftResponse]-KDoc --
+     * kein POST-Redirect auf [create], der Nutzer legt das Rezept bewusst separat an. */
+    @PostMapping("/import")
+    fun import(
+        @Valid @RequestBody request: RecipeImportRequest,
+        @RequestParam(defaultValue = "de") locale: String,
+        authentication: Authentication,
+    ): RecipeImportDraftResponse = recipeImportService.import(authentication.currentUserId(), request.url, locale)
 
     @GetMapping
     fun list(authentication: Authentication): List<RecipeResponse> =

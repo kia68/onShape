@@ -13,6 +13,9 @@ data class ProgramItem(
     val durationMinutes: Int?,
     val targetRir: Int?,
     val restSeconds: Int,
+    /** FR-95: Uebungen mit demselben Wert (innerhalb desselben Tages) bilden einen Supersatz --
+     * nutzt die seit V5 bestehende, bis hierher ungenutzte `program_items.superset_group`-Spalte. */
+    val supersetGroup: Int?,
 )
 
 data class ProgramDay(
@@ -46,6 +49,7 @@ data class NewProgramItem(
     val durationMinutes: Int?,
     val targetRir: Int?,
     val restSeconds: Int,
+    val supersetGroup: Int? = null,
 )
 
 data class NewProgramDay(val weekNumber: Int, val dayIndex: Int, val name: String, val isDeload: Boolean, val items: List<NewProgramItem>)

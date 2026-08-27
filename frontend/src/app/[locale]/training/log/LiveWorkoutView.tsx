@@ -14,6 +14,7 @@ import {
   startSession,
   type PersonalRecord,
   type PrefillSuggestion,
+  type SetTechnique,
   type WorkoutSession,
 } from "@/lib/trainlogApi";
 import { logWorkoutSetWithOfflineFallback, pendingCount, registerOfflineSync } from "@/lib/offlineQueue";
@@ -86,6 +87,11 @@ export function LiveWorkoutView({ locale }: { locale: string }) {
   const [rirInput, setRirInput] = useState("");
   const [restRemaining, setRestRemaining] = useState<number | null>(null);
   const [celebration, setCelebration] = useState<PersonalRecord[] | null>(null);
+  // FR-95: waehrend eines Drop-/Cluster-Satzes bleibt der Slot aktiv (kein Fortschritt in
+  // currentIndex) -- technique != null zeigt an, dass der naechste Log ein Teilsatz derselben
+  // Gruppe ist; subSetIndex zaehlt ab 0 hoch (siehe V20-Migrationskommentar).
+  const [technique, setTechnique] = useState<SetTechnique | null>(null);
+  const [subSetIndex, setSubSetIndex] = useState(0);
   const [pending, setPending] = useState(pendingCount());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -202,7 +208,7 @@ export function LiveWorkoutView({ locale }: { locale: string }) {
     return () => clearTimeout(timer);
   }, [restRemaining]);
 
-  const handleLogSet = async () => {
+  const logCurrentInputs = async (opts: { setTechnique?: SetTechnique; subSetIndex?: number }) => {
     if (!session || !currentSlot) return;
     setCelebration(null);
     const result = await logWorkoutSetWithOfflineFallback(session.id, {
@@ -213,11 +219,40 @@ export function LiveWorkoutView({ locale }: { locale: string }) {
       rir: rirInput ? Number(rirInput) : undefined,
       isWarmup: false,
       completed: true,
+      setTechnique: opts.setTechnique,
+      subSetIndex: opts.subSetIndex,
     });
     setPending(pendingCount());
     if (result.result?.personalRecords.length) setCelebration(result.result.personalRecords);
+    setWeightInput("");
+    setRepsInput("");
+  };
+
+  const advanceToNextSlot = () => {
+    if (!currentSlot) return;
+    setTechnique(null);
+    setSubSetIndex(0);
     if (currentSlot.restSeconds > 0 && currentIndex < slots.length - 1) setRestRemaining(currentSlot.restSeconds);
     setCurrentIndex((i) => i + 1);
+  };
+
+  const handleLogSet = async () => {
+    await logCurrentInputs({});
+    advanceToNextSlot();
+  };
+
+  /** FR-95: startet eine Drop-/Cluster-Satzgruppe -- der aktuell eingegebene Satz wird als
+   * Hauptsatz (subSetIndex 0) geloggt, der Slot bleibt danach aktiv fuer weitere Teilsaetze. */
+  const handleStartTechnique = async (tech: SetTechnique) => {
+    await logCurrentInputs({ setTechnique: tech, subSetIndex: 0 });
+    setTechnique(tech);
+    setSubSetIndex(1);
+  };
+
+  const handleContinueTechnique = async () => {
+    if (!technique) return;
+    await logCurrentInputs({ setTechnique: technique, subSetIndex });
+    setSubSetIndex((i) => i + 1);
   };
 
   const handleFinish = async () => {
@@ -333,7 +368,30 @@ export function LiveWorkoutView({ locale }: { locale: string }) {
             </label>
           </div>
 
-          <Button size="lg" onClick={handleLogSet}>{t("logSet")}</Button>
+          {technique && (
+            <p className="text-center text-xs text-muted-foreground">
+              {t(technique === "dropset" ? "technique.dropsetActive" : "technique.clusterActive", { n: subSetIndex })}
+            </p>
+          )}
+
+          {technique ? (
+            <div className="flex gap-3">
+              <Button size="lg" className="flex-1" onClick={handleContinueTechnique}>{t("technique.continue")}</Button>
+              <Button variant="outline" size="lg" onClick={advanceToNextSlot}>{t("technique.finish")}</Button>
+            </div>
+          ) : (
+            <>
+              <Button size="lg" onClick={handleLogSet}>{t("logSet")}</Button>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" className="flex-1" onClick={() => handleStartTechnique("dropset")}>
+                  {t("technique.startDropset")}
+                </Button>
+                <Button variant="outline" size="sm" className="flex-1" onClick={() => handleStartTechnique("cluster")}>
+                  {t("technique.startCluster")}
+                </Button>
+              </div>
+            </>
+          )}
           <Button variant="outline" size="sm" onClick={handleFinish}>{t("finishWorkout")}</Button>
         </>
       )}

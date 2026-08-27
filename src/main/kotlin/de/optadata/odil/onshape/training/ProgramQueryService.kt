@@ -48,6 +48,15 @@ class ProgramQueryService(
                     )
                 }
             }
+            // FR-95: eine supersetGroup ergibt nur mit >= 2 Uebungen am selben Tag einen Sinn --
+            // ein einzelnes Item mit gesetzter Gruppe waere kein Supersatz, sondern ein Tippfehler.
+            val groupCounts = day.items.mapNotNull { it.supersetGroup }.groupingBy { it }.eachCount()
+            groupCounts.filterValues { it < 2 }.keys.firstOrNull()?.let { lonelyGroup ->
+                throw ResponseStatusException(
+                    HttpStatus.UNPROCESSABLE_ENTITY,
+                    "Supersatz-Gruppe $lonelyGroup an Tag ${day.dayIndex}: braucht mindestens 2 Uebungen",
+                )
+            }
         }
         val programId = rlsSession.asUser(userId) { programRepository.insert(userId, request.toNewProgram(goal)) }
         val program = rlsSession.asUser(userId) { programRepository.findById(programId) } ?: error("Just-created program $programId not found")

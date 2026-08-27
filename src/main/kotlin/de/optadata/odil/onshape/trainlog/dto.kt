@@ -1,5 +1,6 @@
 package de.optadata.odil.onshape.trainlog
 
+import de.optadata.odil.onshape.web.parseEnum
 import jakarta.validation.constraints.Max
 import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotNull
@@ -35,9 +36,14 @@ data class WorkoutSetResponse(
     val isWarmup: Boolean,
     val completed: Boolean,
     val loggedAt: Instant,
+    val setTechnique: String?,
+    val subSetIndex: Int?,
 )
 
-fun WorkoutSet.toResponse() = WorkoutSetResponse(id, exerciseId, setIndex, weightKg, reps, durationSec, distanceM, rir, isWarmup, completed, loggedAt)
+fun WorkoutSet.toResponse() = WorkoutSetResponse(
+    id, exerciseId, setIndex, weightKg, reps, durationSec, distanceM, rir, isWarmup, completed, loggedAt,
+    setTechnique?.dbValue, subSetIndex,
+)
 
 data class WorkoutSessionDetailResponse(val session: WorkoutSessionResponse, val sets: List<WorkoutSetResponse>)
 
@@ -52,9 +58,16 @@ data class LogSetRequest(
     val isWarmup: Boolean = false,
     val completed: Boolean = true,
     val clientId: String?,
+    val setTechnique: String?,
+    @field:Min(0) val subSetIndex: Int?,
 )
 
-fun LogSetRequest.toInput() = LogSetInput(exerciseId, setIndex, weightKg, reps, durationSec, distanceM, rir, isWarmup, completed, clientId)
+/** `setTechnique` kommt als roher String (siehe [de.optadata.odil.onshape.web.parseEnum]-Konvention). */
+fun LogSetRequest.toInput() = LogSetInput(
+    exerciseId, setIndex, weightKg, reps, durationSec, distanceM, rir, isWarmup, completed, clientId,
+    setTechnique = setTechnique?.let { parseEnum(SetTechnique.entries, it, "setTechnique") },
+    subSetIndex = subSetIndex,
+)
 
 data class PersonalRecordResponse(val type: String, val previousBest: Double?, val newValue: Double)
 

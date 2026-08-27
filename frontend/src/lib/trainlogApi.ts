@@ -28,6 +28,8 @@ export function finishSession(id: string, perceivedEffort?: number, notes?: stri
   });
 }
 
+export type SetTechnique = "dropset" | "cluster";
+
 export interface WorkoutSet {
   id: string;
   exerciseId: string;
@@ -40,6 +42,8 @@ export interface WorkoutSet {
   isWarmup: boolean;
   completed: boolean;
   loggedAt: string;
+  setTechnique: SetTechnique | null;
+  subSetIndex: number | null;
 }
 
 export interface WorkoutSessionDetail {
@@ -62,6 +66,8 @@ export interface LogSetRequest {
   isWarmup?: boolean;
   completed?: boolean;
   clientId?: string;
+  setTechnique?: SetTechnique;
+  subSetIndex?: number;
 }
 
 export type PersonalRecordType = "MAX_WEIGHT" | "MAX_REPS_AT_WEIGHT" | "EST_1RM" | "VOLUME";

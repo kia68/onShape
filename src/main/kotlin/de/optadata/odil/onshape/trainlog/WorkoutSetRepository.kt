@@ -29,17 +29,20 @@ class WorkoutSetRepository(private val jdbcTemplate: JdbcTemplate) {
         isWarmup: Boolean,
         completed: Boolean,
         clientId: String?,
+        setTechnique: SetTechnique?,
+        subSetIndex: Int?,
     ): WorkoutSet {
         val insertedId = jdbcTemplate.query(
             """
             INSERT INTO workout_sets
-                (session_id, exercise_id, set_index, weight_kg, reps, duration_sec, distance_m, rir, is_warmup, completed, client_id)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (session_id, exercise_id, set_index, weight_kg, reps, duration_sec, distance_m, rir, is_warmup, completed, client_id, set_technique, sub_set_index)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?::set_technique_t, ?)
             ON CONFLICT (session_id, client_id) WHERE client_id IS NOT NULL DO NOTHING
             RETURNING id
             """.trimIndent(),
             { rs, _ -> rs.getObject("id", UUID::class.java) },
             sessionId, exerciseId, setIndex, weightKg, reps, durationSec, distanceM, rir, isWarmup, completed, clientId,
+            setTechnique?.dbValue, subSetIndex,
         ).firstOrNull()
 
         val id = insertedId
@@ -206,13 +209,15 @@ class WorkoutSetRepository(private val jdbcTemplate: JdbcTemplate) {
             formScore = rs.getObject("form_score", java.math.BigDecimal::class.java)?.toDouble(),
             loggedAt = rs.getTimestamp("logged_at").toInstant(),
             clientId = rs.getString("client_id"),
+            setTechnique = rs.getString("set_technique")?.let { technique -> SetTechnique.entries.first { it.dbValue == technique } },
+            subSetIndex = rs.getObject("sub_set_index", Integer::class.java) as Int?,
         )
     }
 
     private companion object {
         const val SELECT_SQL = """
             SELECT id, session_id, exercise_id, set_index, weight_kg, reps, duration_sec, distance_m,
-                   rir, is_warmup, completed, form_score, logged_at, client_id
+                   rir, is_warmup, completed, form_score, logged_at, client_id, set_technique, sub_set_index
             FROM workout_sets
         """
     }

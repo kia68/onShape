@@ -1,5 +1,6 @@
 package de.optadata.odil.onshape.trainlog
 
+import de.optadata.odil.onshape.onboarding.EnumWithDbValue
 import java.time.Instant
 import java.util.UUID
 
@@ -13,6 +14,14 @@ data class WorkoutSession(
     val notes: String?,
     val clientId: String?,
 )
+
+/** FR-95: Drop-/Cluster-Satz-Markierung auf [WorkoutSet]. Ein einfacher Satz hat kein
+ * [WorkoutSet.setTechnique]; ALLE Zeilen einer Gruppe (auch der Hauptsatz) tragen dieselbe
+ * Technik + einen ab 0 hochzaehlenden [WorkoutSet.subSetIndex] -- siehe V20-Migrationskommentar. */
+enum class SetTechnique(override val dbValue: String) : EnumWithDbValue {
+    DROPSET("dropset"),
+    CLUSTER("cluster"),
+}
 
 data class WorkoutSet(
     val id: UUID,
@@ -29,4 +38,6 @@ data class WorkoutSet(
     val formScore: Double?,
     val loggedAt: Instant,
     val clientId: String?,
+    val setTechnique: SetTechnique?,
+    val subSetIndex: Int?,
 )

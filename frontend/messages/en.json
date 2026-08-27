@@ -314,6 +314,14 @@
     "weightLabel": "Weight (kg)",
     "repsLabel": "Reps",
     "logSet": "Log set",
+    "technique": {
+      "startDropset": "Start as dropset",
+      "startCluster": "Start as cluster set",
+      "dropsetActive": "Dropset – part {n}",
+      "clusterActive": "Cluster set – part {n}",
+      "continue": "Log another part",
+      "finish": "Done, next set"
+    },
     "restTimer": "Rest",
     "workoutDone": "Workout done!",
     "finishWorkout": "Finish workout",

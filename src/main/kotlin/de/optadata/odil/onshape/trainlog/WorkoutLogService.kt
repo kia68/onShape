@@ -20,6 +20,8 @@ data class LogSetInput(
     val isWarmup: Boolean,
     val completed: Boolean,
     val clientId: String?,
+    val setTechnique: SetTechnique?,
+    val subSetIndex: Int?,
 )
 
 data class LogSetResult(val set: WorkoutSet, val personalRecords: List<PersonalRecord>)
@@ -77,6 +79,13 @@ class WorkoutLogService(
         workoutSessionRepository.findById(sessionId)?.takeIf { it.userId == userId }
             ?: throw ResponseStatusException(HttpStatus.NOT_FOUND, "Workout nicht gefunden")
 
+        // FR-95: setTechnique/subSetIndex gehoeren zusammen -- siehe V20-Migrationskommentar
+        // (workout_sets_technique_subindex_xor-Constraint, hier vorab fuer eine verstaendliche 422
+        // statt des rohen DB-Fehlers geprueft, gleiches Muster wie createManual/reps-vs-duration).
+        if ((input.setTechnique == null) != (input.subSetIndex == null)) {
+            throw ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY, "setTechnique und subSetIndex muessen zusammen gesetzt sein oder beide fehlen")
+        }
+
         val priorSamples = if (input.weightKg != null && input.reps != null) {
             workoutSetRepository.findWorkingSetHistory(userId, input.exerciseId).map { it.second }
         } else {
@@ -87,6 +96,7 @@ class WorkoutLogService(
         val set = workoutSetRepository.insert(
             sessionId, input.exerciseId, input.setIndex, input.weightKg, input.reps, input.durationSec,
             input.distanceM, input.rir, input.isWarmup, input.completed, input.clientId,
+            input.setTechnique, input.subSetIndex,
         )
         val records = PersonalRecordDetector.detect(LoggedSet(set.weightKg, set.reps, set.isWarmup, set.completed), prior)
         LogSetResult(set, records)

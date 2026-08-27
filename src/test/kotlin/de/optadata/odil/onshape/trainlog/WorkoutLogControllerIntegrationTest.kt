@@ -202,6 +202,65 @@ class WorkoutLogControllerIntegrationTest : AbstractIntegrationTest() {
             .andExpect(jsonPath("$.maxWeightKg").value(100.0))
     }
 
+    /** FR-95: alle Teilsaetze einer Dropsatz-Gruppe (auch der Hauptsatz) tragen dieselbe
+     * setTechnique + einen ab 0 hochzaehlenden subSetIndex -- siehe V20-Migrationskommentar. */
+    @Test
+    fun `dropsatz-teilsaetze werden mit fortlaufendem subSetIndex geloggt`() {
+        val token = registerAndGetToken()
+        val exerciseId = anyExerciseId(token)
+        val sessionId = objectMapper.readTree(
+            mockMvc.perform(
+                post("/api/trainlog/sessions").header(HttpHeaders.AUTHORIZATION, bearer(token))
+                    .contentType(MediaType.APPLICATION_JSON).content("{}"),
+            ).andReturn().response.contentAsString,
+        ).get("id").asText()
+
+        fun logSet(weight: Double, technique: String?, subSetIndex: Int?) = mockMvc.perform(
+            post("/api/trainlog/sessions/$sessionId/sets").header(HttpHeaders.AUTHORIZATION, bearer(token))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    objectMapper.writeValueAsString(
+                        mapOf(
+                            "exerciseId" to exerciseId, "setIndex" to 0, "weightKg" to weight, "reps" to 8,
+                            "setTechnique" to technique, "subSetIndex" to subSetIndex,
+                        ),
+                    ),
+                ),
+        )
+
+        val main = logSet(100.0, "dropset", 0).andExpect(status().isCreated).andReturn().response.contentAsString
+        val mainSet = objectMapper.readTree(main).get("set")
+        assertEquals("dropset", mainSet.get("setTechnique").asText())
+        assertEquals(0, mainSet.get("subSetIndex").asInt())
+
+        val drop = logSet(80.0, "dropset", 1).andExpect(status().isCreated).andReturn().response.contentAsString
+        val dropSet = objectMapper.readTree(drop).get("set")
+        assertEquals("dropset", dropSet.get("setTechnique").asText())
+        assertEquals(1, dropSet.get("subSetIndex").asInt())
+    }
+
+    @Test
+    fun `satztechnik ohne subSetIndex wird abgelehnt`() {
+        val token = registerAndGetToken()
+        val exerciseId = anyExerciseId(token)
+        val sessionId = objectMapper.readTree(
+            mockMvc.perform(
+                post("/api/trainlog/sessions").header(HttpHeaders.AUTHORIZATION, bearer(token))
+                    .contentType(MediaType.APPLICATION_JSON).content("{}"),
+            ).andReturn().response.contentAsString,
+        ).get("id").asText()
+
+        mockMvc.perform(
+            post("/api/trainlog/sessions/$sessionId/sets").header(HttpHeaders.AUTHORIZATION, bearer(token))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    objectMapper.writeValueAsString(
+                        mapOf("exerciseId" to exerciseId, "setIndex" to 0, "weightKg" to 100.0, "reps" to 8, "setTechnique" to "cluster"),
+                    ),
+                ),
+        ).andExpect(status().isUnprocessableEntity)
+    }
+
     @Test
     fun `vorbelegung ohne vorherige saetze schlaegt auch keine aufwaermsaetze vor`() {
         val token = registerAndGetToken()

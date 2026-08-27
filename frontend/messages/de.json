@@ -314,6 +314,14 @@
     "weightLabel": "Gewicht (kg)",
     "repsLabel": "Wiederholungen",
     "logSet": "Satz eintragen",
+    "technique": {
+      "startDropset": "Als Dropsatz starten",
+      "startCluster": "Als Clustersatz starten",
+      "dropsetActive": "Dropsatz – Teilsatz {n}",
+      "clusterActive": "Clustersatz – Teilsatz {n}",
+      "continue": "Weiterer Teilsatz",
+      "finish": "Fertig, nächster Satz"
+    },
     "restTimer": "Pause",
     "workoutDone": "Workout geschafft!",
     "finishWorkout": "Workout beenden",

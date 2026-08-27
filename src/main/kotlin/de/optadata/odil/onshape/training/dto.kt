@@ -20,6 +20,7 @@ data class ManualProgramItemRequest(
     val durationMinutes: Int?,
     val targetRir: Int?,
     @field:Min(0) val restSeconds: Int,
+    val supersetGroup: Int? = null,
 )
 
 data class ManualProgramDayRequest(
@@ -56,7 +57,10 @@ fun ManualProgramRequest.toNewProgram(goal: Goal) = NewProgram(
             name = day.name,
             isDeload = day.isDeload,
             items = day.items.map { item ->
-                NewProgramItem(item.exerciseId, item.sortOrder, item.sets, item.repMin, item.repMax, item.durationMinutes, item.targetRir, item.restSeconds)
+                NewProgramItem(
+                    item.exerciseId, item.sortOrder, item.sets, item.repMin, item.repMax, item.durationMinutes,
+                    item.targetRir, item.restSeconds, item.supersetGroup,
+                )
             },
         )
     },
@@ -73,6 +77,7 @@ data class ProgramItemResponse(
     val durationMinutes: Int?,
     val targetRir: Int?,
     val restSeconds: Int,
+    val supersetGroup: Int?,
 )
 
 data class ProgramDayResponse(
@@ -124,6 +129,7 @@ fun Program.toResponse(namesById: Map<UUID, String>) = ProgramResponse(
                     durationMinutes = item.durationMinutes,
                     targetRir = item.targetRir,
                     restSeconds = item.restSeconds,
+                    supersetGroup = item.supersetGroup,
                 )
             },
         )

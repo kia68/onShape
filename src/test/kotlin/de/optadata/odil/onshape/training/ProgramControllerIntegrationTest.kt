@@ -238,6 +238,83 @@ class ProgramControllerIntegrationTest : AbstractIntegrationTest() {
         ).andExpect(status().isUnprocessableEntity)
     }
 
+    /** FR-95: zwei Uebungen mit derselben supersetGroup am selben Tag bilden einen gueltigen
+     * Supersatz -- die Spalte program_items.superset_group existiert seit V5, war aber bis
+     * FR-95 nie beschrieben. */
+    @Test
+    fun `manueller plan mit supersatz-gruppe legt beide uebungen mit derselben gruppe an`() {
+        val token = registerOnboardedUser()
+        val exercisesResponse = mockMvc.perform(get("/api/training/exercises").header(HttpHeaders.AUTHORIZATION, bearer(token)))
+            .andExpect(status().isOk).andReturn().response.contentAsString
+        val exercises = objectMapper.readTree(exercisesResponse)
+        val firstId = exercises[0].get("id").asText()
+        val secondId = exercises[1].get("id").asText()
+
+        val response = mockMvc.perform(
+            post("/api/training/programs").header(HttpHeaders.AUTHORIZATION, bearer(token))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    objectMapper.writeValueAsString(
+                        mapOf(
+                            "name" to "Supersatz-Plan", "goal" to "maintain", "daysPerWeek" to 1, "weeks" to 1, "splitType" to "full_body",
+                            "days" to listOf(
+                                mapOf(
+                                    "weekNumber" to 1, "dayIndex" to 0, "name" to "Tag A", "isDeload" to false,
+                                    "items" to listOf(
+                                        mapOf(
+                                            "exerciseId" to firstId, "sortOrder" to 0, "sets" to 3,
+                                            "repMin" to 8, "repMax" to 12, "durationMinutes" to null, "targetRir" to 2, "restSeconds" to 0,
+                                            "supersetGroup" to 1,
+                                        ),
+                                        mapOf(
+                                            "exerciseId" to secondId, "sortOrder" to 1, "sets" to 3,
+                                            "repMin" to 8, "repMax" to 12, "durationMinutes" to null, "targetRir" to 2, "restSeconds" to 90,
+                                            "supersetGroup" to 1,
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+        ).andExpect(status().isCreated).andReturn().response.contentAsString
+        val items = objectMapper.readTree(response).get("days")[0].get("items")
+        assertEquals(1, items[0].get("supersetGroup").asInt())
+        assertEquals(1, items[1].get("supersetGroup").asInt())
+    }
+
+    @Test
+    fun `manueller plan mit alleinstehender supersatz-gruppe wird abgelehnt`() {
+        val token = registerOnboardedUser()
+        val exercisesResponse = mockMvc.perform(get("/api/training/exercises").header(HttpHeaders.AUTHORIZATION, bearer(token)))
+            .andExpect(status().isOk).andReturn().response.contentAsString
+        val anyExerciseId = objectMapper.readTree(exercisesResponse).get(0).get("id").asText()
+
+        mockMvc.perform(
+            post("/api/training/programs").header(HttpHeaders.AUTHORIZATION, bearer(token))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                    objectMapper.writeValueAsString(
+                        mapOf(
+                            "name" to "Ungueltiger Supersatz-Plan", "goal" to "maintain", "daysPerWeek" to 1, "weeks" to 1, "splitType" to "full_body",
+                            "days" to listOf(
+                                mapOf(
+                                    "weekNumber" to 1, "dayIndex" to 0, "name" to "Tag A", "isDeload" to false,
+                                    "items" to listOf(
+                                        mapOf(
+                                            "exerciseId" to anyExerciseId, "sortOrder" to 0, "sets" to 3,
+                                            "repMin" to 8, "repMax" to 12, "durationMinutes" to null, "targetRir" to 2, "restSeconds" to 90,
+                                            "supersetGroup" to 1,
+                                        ),
+                                    ),
+                                ),
+                            ),
+                        ),
+                    ),
+                ),
+        ).andExpect(status().isUnprocessableEntity)
+    }
+
     /** BIZ-01 (§15.1 "Trainingsplan-Generator: 1 aktiver Plan" im Free-Tier). Frisch registrierte
      * Nutzer ohne Abo sind FREE (siehe SubscriptionService). */
     @Test

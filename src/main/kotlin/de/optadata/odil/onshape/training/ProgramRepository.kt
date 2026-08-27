@@ -41,11 +41,11 @@ class ProgramRepository(
             for (item in day.items) {
                 jdbcTemplate.update(
                     """
-                    INSERT INTO program_items (program_day_id, exercise_id, sort_order, sets, rep_min, rep_max, duration_minutes, target_rir, rest_seconds)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    INSERT INTO program_items (program_day_id, exercise_id, sort_order, sets, rep_min, rep_max, duration_minutes, target_rir, rest_seconds, superset_group)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """.trimIndent(),
                     dayId, item.exerciseId, item.sortOrder, item.sets, item.repMin, item.repMax,
-                    item.durationMinutes, item.targetRir, item.restSeconds,
+                    item.durationMinutes, item.targetRir, item.restSeconds, item.supersetGroup,
                 )
             }
         }
@@ -99,7 +99,7 @@ class ProgramRepository(
         val placeholders = dayIds.joinToString(",") { "?" }
         return jdbcTemplate.query(
             """
-            SELECT id, program_day_id, exercise_id, sort_order, sets, rep_min, rep_max, duration_minutes, target_rir, rest_seconds
+            SELECT id, program_day_id, exercise_id, sort_order, sets, rep_min, rep_max, duration_minutes, target_rir, rest_seconds, superset_group
             FROM program_items WHERE program_day_id IN ($placeholders) ORDER BY sort_order
             """.trimIndent(),
             { rs, _ ->
@@ -113,6 +113,7 @@ class ProgramRepository(
                     durationMinutes = rs.getObject("duration_minutes", Integer::class.java) as Int?,
                     targetRir = rs.getObject("target_rir", Integer::class.java) as Int?,
                     restSeconds = rs.getInt("rest_seconds"),
+                    supersetGroup = rs.getObject("superset_group", Integer::class.java) as Int?,
                 )
             },
             *dayIds.toTypedArray(),

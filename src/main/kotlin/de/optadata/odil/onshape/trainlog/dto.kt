@@ -64,15 +64,21 @@ data class LogSetResponse(val set: WorkoutSetResponse, val personalRecords: List
 
 fun LogSetResult.toResponse() = LogSetResponse(set.toResponse(), personalRecords.map { it.toResponse() })
 
+data class WarmupSetResponse(val weightKg: Double, val reps: Int)
+
 data class PrefillResponse(
     val lastWeightKg: Double?,
     val lastReps: Int?,
     val lastRir: Int?,
     val suggestedWeightKg: Double?,
     val suggestedReps: Int?,
+    val warmupSets: List<WarmupSetResponse>,
 )
 
-fun PrefillSuggestion.toResponse() = PrefillResponse(lastWeightKg, lastReps, lastRir, suggestedWeightKg, suggestedReps)
+fun PrefillSuggestion.toResponse() = PrefillResponse(
+    lastWeightKg, lastReps, lastRir, suggestedWeightKg, suggestedReps,
+    warmupSets.map { WarmupSetResponse(it.weightKg, it.reps) },
+)
 
 data class OneRepMaxPointResponse(val loggedAt: Instant, val estimated1Rm: Double)
 

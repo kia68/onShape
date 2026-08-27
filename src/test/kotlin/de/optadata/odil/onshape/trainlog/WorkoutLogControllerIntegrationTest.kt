@@ -147,6 +147,11 @@ class WorkoutLogControllerIntegrationTest : AbstractIntegrationTest() {
         assertEquals(10, prefill.get("lastReps").asInt())
         // Wiederholungsdach (10) bei niedrigem RIR (1 <= Ziel 2) erreicht -> Gewicht steigt
         assertEquals(62.5, prefill.get("suggestedWeightKg").asDouble())
+        // FR-94: Aufwaermsaetze aus dem HEUTE vorgeschlagenen Gewicht (62.5kg, >= 60kg -> 3 Saetze)
+        assertEquals(3, prefill.get("warmupSets").size())
+        assertEquals(25.0, prefill.get("warmupSets")[0].get("weightKg").asDouble())
+        assertEquals(8, prefill.get("warmupSets")[0].get("reps").asInt())
+        assertEquals(50.0, prefill.get("warmupSets")[2].get("weightKg").asDouble())
 
         // clientId-Idempotenz: derselbe Satz zweimal gesendet erzeugt keinen zweiten Eintrag
         val body = objectMapper.writeValueAsString(
@@ -195,5 +200,16 @@ class WorkoutLogControllerIntegrationTest : AbstractIntegrationTest() {
         mockMvc.perform(get("/api/trainlog/exercises/$exerciseId/personal-bests").header(HttpHeaders.AUTHORIZATION, bearer(token)))
             .andExpect(status().isOk)
             .andExpect(jsonPath("$.maxWeightKg").value(100.0))
+    }
+
+    @Test
+    fun `vorbelegung ohne vorherige saetze schlaegt auch keine aufwaermsaetze vor`() {
+        val token = registerAndGetToken()
+        val exerciseId = anyExerciseId(token)
+
+        mockMvc.perform(get("/api/trainlog/exercises/$exerciseId/prefill").header(HttpHeaders.AUTHORIZATION, bearer(token)))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.lastWeightKg").doesNotExist())
+            .andExpect(jsonPath("$.warmupSets").isEmpty)
     }
 }

@@ -58,12 +58,17 @@ class WorkoutLogService(
 
     /** FR-90/91: Vorbelegung fuer den naechsten Satz dieser Uebung. Bezieht sich immer auf die
      * VORHERIGE Session -- innerhalb der laufenden Session bereits geloggte Saetze derselben
-     * Uebung zaehlen nicht als "letztes Mal". */
+     * Uebung zaehlen nicht als "letztes Mal". FR-94: Aufwaermsaetze werden aus dem fuer HEUTE
+     * vorgeschlagenen Arbeitsgewicht berechnet (nicht aus dem letzten Mal) -- faellt auf das
+     * zuletzt geloggte Gewicht zurueck, wenn die Progression kein neues vorschlaegt (z.B. beim
+     * allerersten Satz dieser Uebung ueberhaupt gibt es auch dafuer noch nichts). */
     fun prefill(userId: UUID, exerciseId: UUID, repMax: Int?, targetRir: Int?): PrefillSuggestion = rlsSession.asUser(userId) {
         val active = workoutSessionRepository.findActiveByUser(userId)
         val last = active?.let { workoutSetRepository.findLastWorkingSet(userId, exerciseId, it.id) }
         val lastValues = last?.let { LastSetValues(it.weightKg, it.reps, it.rir) }
-        ProgressionSuggester.suggest(lastValues, repMax, targetRir)
+        val suggestion = ProgressionSuggester.suggest(lastValues, repMax, targetRir)
+        val warmupSets = WarmupSetCalculator.calculate(suggestion.suggestedWeightKg ?: suggestion.lastWeightKg)
+        suggestion.copy(warmupSets = warmupSets)
     }
 
     /** FR-90 (2 Taps), FR-93 (RIR), FR-96 (Offline via clientId), FR-98 (PR-Erkennung inline

@@ -84,12 +84,19 @@ export function logSet(sessionId: string, entry: LogSetRequest) {
   });
 }
 
+export interface WarmupSet {
+  weightKg: number;
+  reps: number;
+}
+
 export interface PrefillSuggestion {
   lastWeightKg: number | null;
   lastReps: number | null;
   lastRir: number | null;
   suggestedWeightKg: number | null;
   suggestedReps: number | null;
+  /** FR-94, aus dem heute vorgeschlagenen Arbeitsgewicht berechnet. */
+  warmupSets: WarmupSet[];
 }
 
 export function fetchPrefill(exerciseId: string, repMax?: number, targetRir?: number) {

@@ -290,6 +290,16 @@ export function LiveWorkoutView({ locale }: { locale: string }) {
             </p>
           )}
 
+          {/* FR-94: nur vor dem ERSTEN Satz dieser Uebung in diesem Workout, nicht vor jedem
+              einzelnen Arbeitssatz erneut. Rein informativ, kein eigenes Logging pro Aufwaermsatz
+              (gleiche Zurueckhaltung wie beim FR-79-Deload-Hinweis). */}
+          {prefill && prefill.warmupSets.length > 0 && slots.findIndex((s) => s.exerciseId === currentSlot.exerciseId) === currentIndex && (
+            <div className="rounded-md border border-input p-3 text-center text-sm">
+              <p className="mb-1 text-xs font-medium text-muted-foreground">{t("warmup.title")}</p>
+              <p>{prefill.warmupSets.map((w) => `${w.weightKg} kg × ${w.reps}`).join("  →  ")}</p>
+            </div>
+          )}
+
           <div className="flex gap-3">
             <label className="flex flex-1 flex-col gap-1 text-sm">
               <span className="font-medium">{t("weightLabel")}</span>

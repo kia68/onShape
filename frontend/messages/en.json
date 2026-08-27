@@ -308,6 +308,9 @@
     "targetReps": "{min}–{max} reps",
     "targetDuration": "{minutes} min",
     "lastTime": "Last time: {weight} kg × {reps}",
+    "warmup": {
+      "title": "Warm-up"
+    },
     "weightLabel": "Weight (kg)",
     "repsLabel": "Reps",
     "logSet": "Log set",

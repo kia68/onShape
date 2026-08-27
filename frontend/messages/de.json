@@ -308,6 +308,9 @@
     "targetReps": "{min}–{max} Wiederholungen",
     "targetDuration": "{minutes} Min.",
     "lastTime": "Letztes Mal: {weight} kg × {reps}",
+    "warmup": {
+      "title": "Aufwaermen"
+    },
     "weightLabel": "Gewicht (kg)",
     "repsLabel": "Wiederholungen",
     "logSet": "Satz eintragen",

@@ -8,6 +8,11 @@ data class PrefillSuggestion(
     val lastRir: Int?,
     val suggestedWeightKg: Double?,
     val suggestedReps: Int?,
+    /** FR-94, vom Aufrufer per [WarmupSetCalculator] nachtraeglich befuellt (siehe
+     * [de.optadata.odil.onshape.trainlog.WorkoutLogService.prefill]) -- bewusst NICHT hier in
+     * [suggest] berechnet, damit diese Klasse bei der reinen Gewichts-/Wiederholungs-Progression
+     * bleibt. */
+    val warmupSets: List<WarmupSet> = emptyList(),
 )
 
 /**

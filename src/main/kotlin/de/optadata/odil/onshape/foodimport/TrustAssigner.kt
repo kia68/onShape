@@ -6,7 +6,7 @@ object TrustAssigner {
     fun assign(source: FoodSource, manuallyVerified: Boolean = false): TrustLevel {
         if (manuallyVerified) return TrustLevel.VERIFIED
         return when (source) {
-            FoodSource.BLS, FoodSource.USDA, FoodSource.BRAND_VERIFIED -> TrustLevel.VERIFIED
+            FoodSource.BLS, FoodSource.USDA, FoodSource.BRAND_VERIFIED, FoodSource.NAEHRWERTDATEN_CH -> TrustLevel.VERIFIED
             FoodSource.OFF, FoodSource.USER -> TrustLevel.COMMUNITY
             FoodSource.AI_ESTIMATE -> TrustLevel.ESTIMATED
         }

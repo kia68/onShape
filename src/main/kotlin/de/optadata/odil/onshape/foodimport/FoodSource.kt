@@ -8,4 +8,5 @@ enum class FoodSource(val dbValue: String) {
     BRAND_VERIFIED("brand_verified"),
     USER("user"),
     AI_ESTIMATE("ai_estimate"),
+    NAEHRWERTDATEN_CH("naehrwertdaten_ch"),
 }

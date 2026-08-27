@@ -1,5 +1,7 @@
 package de.optadata.odil.onshape.security
 
+import de.optadata.odil.onshape.partnerapi.PartnerApiKeyFilter
+import de.optadata.odil.onshape.partnerapi.PartnerApiKeyService
 import org.springframework.beans.factory.ObjectProvider
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
@@ -26,9 +28,14 @@ class SecurityConfig(
     private val jwtService: JwtService,
     private val oAuth2SuccessHandler: OAuth2SuccessHandler,
     private val clientRegistrationRepository: ObjectProvider<ClientRegistrationRepository>,
+    private val partnerApiKeyService: PartnerApiKeyService,
     @Value("\${app.cors.allowed-origins:http://localhost:3000}") private val allowedOrigins: List<String>,
     @Value("\${app.security.auth-rate-limit.max-requests:30}") private val authRateLimitMaxRequests: Int,
     @Value("\${app.security.auth-rate-limit.window-seconds:60}") private val authRateLimitWindowSeconds: Long,
+    @Value("\${app.partner-api.registration-rate-limit.max-requests:5}") private val partnerRegistrationMaxRequests: Int,
+    @Value("\${app.partner-api.registration-rate-limit.window-seconds:3600}") private val partnerRegistrationWindowSeconds: Long,
+    @Value("\${app.partner-api.call-rate-limit.max-requests:120}") private val partnerCallMaxRequests: Int,
+    @Value("\${app.partner-api.call-rate-limit.window-seconds:60}") private val partnerCallWindowSeconds: Long,
 ) {
 
     @Bean
@@ -41,8 +48,10 @@ class SecurityConfig(
             .authorizeHttpRequests { auth ->
                 auth
                     // /api/billing/webhook: Stripe ruft ohne JWT auf, die Stripe-Signature-Pruefung
-                    // im Controller uebernimmt die Authentifizierung (BIZ-02).
-                    .requestMatchers("/api/auth/**", "/actuator/health", "/api/billing/webhook").permitAll()
+                    // im Controller uebernimmt die Authentifizierung (BIZ-02). /api/partner/v1/**:
+                    // eigener Key-basierter Auth-Pfad ueber PartnerApiKeyFilter (SCALE-03), kein JWT.
+                    .requestMatchers("/api/auth/**", "/actuator/health", "/api/billing/webhook", "/api/partner/v1/**")
+                    .permitAll()
                     .anyRequest().authenticated()
             }
             .addFilterBefore(
@@ -50,6 +59,14 @@ class SecurityConfig(
                 UsernamePasswordAuthenticationFilter::class.java,
             )
             .addFilterBefore(JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter::class.java)
+            .addFilterBefore(
+                PartnerApiKeyFilter(
+                    partnerApiKeyService,
+                    registrationLimiter = RateLimiter(partnerRegistrationMaxRequests, partnerRegistrationWindowSeconds),
+                    callLimiter = RateLimiter(partnerCallMaxRequests, partnerCallWindowSeconds),
+                ),
+                UsernamePasswordAuthenticationFilter::class.java,
+            )
 
         if (clientRegistrationRepository.ifAvailable != null) {
             http.oauth2Login { it.successHandler(oAuth2SuccessHandler) }

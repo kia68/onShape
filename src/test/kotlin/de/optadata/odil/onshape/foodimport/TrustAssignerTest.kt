@@ -7,10 +7,11 @@ import kotlin.test.assertTrue
 class TrustAssignerTest {
 
     @Test
-    fun `bls usda and brand-verified are verified by default`() {
+    fun `bls usda brand-verified and naehrwertdaten-ch are verified by default`() {
         assertEquals(TrustLevel.VERIFIED, TrustAssigner.assign(FoodSource.BLS))
         assertEquals(TrustLevel.VERIFIED, TrustAssigner.assign(FoodSource.USDA))
         assertEquals(TrustLevel.VERIFIED, TrustAssigner.assign(FoodSource.BRAND_VERIFIED))
+        assertEquals(TrustLevel.VERIFIED, TrustAssigner.assign(FoodSource.NAEHRWERTDATEN_CH))
     }
 
     @Test

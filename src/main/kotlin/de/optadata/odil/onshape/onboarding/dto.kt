@@ -42,3 +42,19 @@ data class OnboardingResultResponse(
     val calculation: Map<String, Any?>,
     val healthAdvisory: HealthScreeningResult,
 )
+
+/** FR-134. `eligible=false` liefert nur [reason] und den formelbasierten [formulaTdeeKcal] als
+ * Fallback -- kein [adaptiveTdeeKcal] (KONZEPT.md: "sonst ... erklaert, warum"). */
+data class AdaptiveTdeeResponse(
+    val eligible: Boolean,
+    val reason: AdaptiveTdeeIneligibleReason?,
+    val adaptiveTdeeKcal: Int?,
+    val formulaTdeeKcal: Int,
+    val windowDays: Int,
+    val weighInsInWindow: Int,
+    val nutritionAdherence: Double,
+)
+
+/** BIZ-01 (§15.1 "Adaptives TDEE: —" im Free-Tier), siehe [de.optadata.odil.onshape.billing.TierPolicy.canShowAdaptiveTdee]. */
+class AdaptiveTdeeRequiresUpgradeException :
+    RuntimeException("Adaptives TDEE ist ein Plus/Coach-Feature -- auf Plus/Coach upgraden")

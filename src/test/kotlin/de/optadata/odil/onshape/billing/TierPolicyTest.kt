@@ -60,4 +60,11 @@ class TierPolicyTest {
         assertTrue(TierPolicy.canShowWeeklyReport(Tier.PLUS))
         assertTrue(TierPolicy.canShowWeeklyReport(Tier.COACH))
     }
+
+    @Test
+    fun `adaptives tdee ist komplett gesperrt im free-tier, sonst frei`() {
+        assertFalse(TierPolicy.canShowAdaptiveTdee(Tier.FREE))
+        assertTrue(TierPolicy.canShowAdaptiveTdee(Tier.PLUS))
+        assertTrue(TierPolicy.canShowAdaptiveTdee(Tier.COACH))
+    }
 }

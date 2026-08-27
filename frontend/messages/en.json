@@ -391,6 +391,20 @@
         "ON_TRACK": "This week went smoothly -- keep it up."
       }
     },
+    "adaptiveTdee": {
+      "title": "Adaptive calorie need",
+      "requiresUpgrade": "Adaptive TDEE is a Plus/Coach feature.",
+      "upgradeLink": "Upgrade now",
+      "eligible": "Based on your weight trend, your actual calorie need is about {adaptive} kcal (formula estimate: {formula} kcal).",
+      "disclaimer": "Informational -- your daily calorie budget is not yet automatically adjusted based on this.",
+      "formulaFallback": "The formula estimate still applies: {formula} kcal.",
+      "reason": {
+        "INSUFFICIENT_WINDOW": "At least 14 days of data are needed before an adjustment is possible.",
+        "INSUFFICIENT_WEIGH_INS": "At least 10 weight measurements in the last 14 days are needed.",
+        "INSUFFICIENT_ADHERENCE": "Your nutrition logging has too many gaps in the last 14 days for a reliable adjustment.",
+        "MISSING_WEIGHT_DATA": "Weight measurements are missing at the edge of the evaluation window."
+      }
+    },
     "export": {
       "json": "Export as JSON",
       "csv": "Export as CSV"

@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
-import { ApiError } from "@/lib/api";
+import { ApiError, fetchAdaptiveTdee, type AdaptiveTdeeResponse } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { addDays, toIsoDate } from "@/lib/dateUtils";
 import {
@@ -78,6 +78,11 @@ export function ProgressView() {
   const [weeklyReportRequiresUpgrade, setWeeklyReportRequiresUpgrade] = useState(false);
   const [weeklyReportError, setWeeklyReportError] = useState(false);
 
+  // FR-134 (Plus/Coach) -- ebenfalls eigener State/Fehlerpfad.
+  const [adaptiveTdee, setAdaptiveTdee] = useState<AdaptiveTdeeResponse | null>(null);
+  const [adaptiveTdeeRequiresUpgrade, setAdaptiveTdeeRequiresUpgrade] = useState(false);
+  const [adaptiveTdeeError, setAdaptiveTdeeError] = useState(false);
+
   const load = useCallback(async () => {
     try {
       const [weightResult, nutritionResult, volumeResult, exercisesResult] = await Promise.all([
@@ -119,6 +124,24 @@ export function ProgressView() {
     }, 0);
     return () => clearTimeout(timer);
   }, [weeklyReportRequestedWeekStart]);
+
+  useEffect(() => {
+    const timer = setTimeout(async () => {
+      setAdaptiveTdeeRequiresUpgrade(false);
+      setAdaptiveTdeeError(false);
+      try {
+        setAdaptiveTdee(await fetchAdaptiveTdee());
+      } catch (e) {
+        setAdaptiveTdee(null);
+        if (e instanceof ApiError && e.code === "adaptive_tdee_requires_upgrade") {
+          setAdaptiveTdeeRequiresUpgrade(true);
+        } else {
+          setAdaptiveTdeeError(true);
+        }
+      }
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -201,6 +224,30 @@ export function ProgressView() {
             )}
 
             <p className="mt-1 text-sm font-medium">{t(`weeklyReport.recommendation.${weeklyReport.recommendation}`)}</p>
+          </div>
+        )}
+      </section>
+
+      {/* FR-134 -- informativ, ersetzt NICHT das taegliche Kalorienbudget (siehe Backend-KDoc). */}
+      <section className="rounded-md border border-input p-4">
+        <h2 className="mb-2 text-sm font-semibold text-muted-foreground">{t("adaptiveTdee.title")}</h2>
+        {adaptiveTdeeRequiresUpgrade && (
+          <p className="text-sm text-amber-600">
+            {t("adaptiveTdee.requiresUpgrade")}{" "}
+            <Link href="/pricing" className="underline underline-offset-4">{t("adaptiveTdee.upgradeLink")}</Link>
+          </p>
+        )}
+        {adaptiveTdeeError && <p className="text-sm text-muted-foreground">{t("errors.unknown_error")}</p>}
+        {adaptiveTdee && adaptiveTdee.eligible && adaptiveTdee.adaptiveTdeeKcal != null && (
+          <div className="flex flex-col gap-1">
+            <p className="text-sm">{t("adaptiveTdee.eligible", { adaptive: adaptiveTdee.adaptiveTdeeKcal, formula: adaptiveTdee.formulaTdeeKcal })}</p>
+            <p className="text-xs text-muted-foreground">{t("adaptiveTdee.disclaimer")}</p>
+          </div>
+        )}
+        {adaptiveTdee && !adaptiveTdee.eligible && (
+          <div className="flex flex-col gap-1">
+            <p className="text-sm text-muted-foreground">{t(`adaptiveTdee.reason.${adaptiveTdee.reason}`)}</p>
+            <p className="text-sm">{t("adaptiveTdee.formulaFallback", { formula: adaptiveTdee.formulaTdeeKcal })}</p>
           </div>
         )}
       </section>

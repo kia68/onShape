@@ -8,6 +8,7 @@ import de.optadata.odil.onshape.billing.LifetimeCapReachedException
 import de.optadata.odil.onshape.billing.NoStripeCustomerException
 import de.optadata.odil.onshape.legal.CoreConsentImmutableException
 import de.optadata.odil.onshape.legal.CoreConsentRequiredException
+import de.optadata.odil.onshape.onboarding.AdaptiveTdeeRequiresUpgradeException
 import de.optadata.odil.onshape.onboarding.GoalRateExceededException
 import de.optadata.odil.onshape.onboarding.TargetWeightBmiTooLowException
 import de.optadata.odil.onshape.onboarding.UnderMinimumAgeException
@@ -53,6 +54,10 @@ class GlobalExceptionHandler {
     @ExceptionHandler(ProgramLimitExceededException::class)
     fun handleProgramLimitExceeded(e: ProgramLimitExceededException) =
         ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ApiError("program_limit_exceeded", e.message ?: "program limit exceeded"))
+
+    @ExceptionHandler(AdaptiveTdeeRequiresUpgradeException::class)
+    fun handleAdaptiveTdeeRequiresUpgrade(e: AdaptiveTdeeRequiresUpgradeException) =
+        ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ApiError("adaptive_tdee_requires_upgrade", e.message ?: "adaptive tdee requires upgrade"))
 
     @ExceptionHandler(WeeklyReportRequiresUpgradeException::class)
     fun handleWeeklyReportRequiresUpgrade(e: WeeklyReportRequiresUpgradeException) =

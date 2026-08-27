@@ -391,6 +391,20 @@
         "ON_TRACK": "Diese Woche lief rund -- weiter so."
       }
     },
+    "adaptiveTdee": {
+      "title": "Adaptiver Kalorienbedarf",
+      "requiresUpgrade": "Adaptives TDEE ist ein Plus/Coach-Feature.",
+      "upgradeLink": "Jetzt upgraden",
+      "eligible": "Dein tatsaechlicher Kalorienbedarf liegt laut Gewichtsverlauf bei ca. {adaptive} kcal (Formel-Schaetzung: {formula} kcal).",
+      "disclaimer": "Informativ -- dein taegliches Kalorienbudget wird dadurch noch nicht automatisch angepasst.",
+      "formulaFallback": "Aktuell gilt weiter die Formel-Schaetzung: {formula} kcal.",
+      "reason": {
+        "INSUFFICIENT_WINDOW": "Es werden mindestens 14 Tage Daten gebraucht, bevor eine Anpassung moeglich ist.",
+        "INSUFFICIENT_WEIGH_INS": "Es werden mindestens 10 Gewichtsmessungen in den letzten 14 Tagen gebraucht.",
+        "INSUFFICIENT_ADHERENCE": "Dein Ernaehrungs-Logging ist in den letzten 14 Tagen zu lueckenhaft fuer eine verlaessliche Anpassung.",
+        "MISSING_WEIGHT_DATA": "Es fehlen Gewichtsmessungen am Rand des Auswertungszeitraums."
+      }
+    },
     "export": {
       "json": "Export als JSON",
       "csv": "Export als CSV"

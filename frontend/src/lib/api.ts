@@ -119,3 +119,26 @@ export function submitOnboarding(payload: OnboardingRequest) {
 export function fetchOnboardingResult() {
   return request<OnboardingResultResponse>("/api/onboarding/result");
 }
+
+export type AdaptiveTdeeIneligibleReason =
+  | "INSUFFICIENT_WINDOW"
+  | "INSUFFICIENT_WEIGH_INS"
+  | "INSUFFICIENT_ADHERENCE"
+  | "MISSING_WEIGHT_DATA";
+
+/** FR-134 (Plus/Coach): informativ, ersetzt NICHT das taegliche Kalorienbudget, siehe
+ * AdaptiveTdeeService (Backend)-KDoc. */
+export interface AdaptiveTdeeResponse {
+  eligible: boolean;
+  reason: AdaptiveTdeeIneligibleReason | null;
+  adaptiveTdeeKcal: number | null;
+  formulaTdeeKcal: number;
+  windowDays: number;
+  weighInsInWindow: number;
+  nutritionAdherence: number;
+}
+
+/** BIZ-01: 422 `adaptive_tdee_requires_upgrade` im Free-Tier. */
+export function fetchAdaptiveTdee() {
+  return request<AdaptiveTdeeResponse>("/api/onboarding/adaptive-tdee");
+}

@@ -474,6 +474,34 @@
     "scanAgain": "Neu scannen",
     "scanning": "Scanne …",
     "cachedHint": "Bereits in dieser Sitzung gescannt",
+    "mode": {
+      "single": "Einzelscan",
+      "shoppingList": "Einkaufsliste",
+      "compare": "Regal-Vergleich"
+    },
+    "shoppingList": {
+      "notFound": "Barcode {barcode} nicht gefunden — übersprungen.",
+      "remove": "Entfernen",
+      "finish": "Einkauf abschließen",
+      "newList": "Neue Einkaufsliste",
+      "summary": {
+        "title": "Einkaufsübersicht",
+        "itemCount": "{count, plural, one {# Produkt gescannt} other {# Produkte gescannt}}",
+        "totalProtein": "Insgesamt {g} g Protein",
+        "coversDays": "Dieser Einkauf deckt {days} Tage Protein",
+        "noTarget": "Kein Tagesziel bekannt (Onboarding abschließen für die Tage-Abdeckung)."
+      }
+    },
+    "compare": {
+      "notFound": "Barcode {barcode} nicht gefunden — übersprungen.",
+      "scanSecond": "Zweites Produkt scannen …",
+      "newCompare": "Neuer Vergleich",
+      "winner": "Bessere Wahl",
+      "kcal": "kcal / 100g",
+      "protein": "Protein / 100g",
+      "fat": "Fett / 100g",
+      "carbs": "Kohlenhydrate / 100g"
+    },
     "notFound": {
       "title": "Produkt nicht gefunden",
       "subtitle": "Barcode {barcode} ist noch nicht in der Datenbank. Leg es an — andere Nutzer profitieren davon.",

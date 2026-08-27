@@ -374,6 +374,23 @@
       "title": "Strength history (estimated 1RM)",
       "empty": "No logged exercises yet."
     },
+    "weeklyReport": {
+      "title": "Weekly report",
+      "requiresUpgrade": "The weekly report is a Plus/Coach feature.",
+      "upgradeLink": "Upgrade now",
+      "previousWeek": "◄ Previous week",
+      "nextWeek": "Next week ►",
+      "training": "{completed} of {planned} planned training sessions completed",
+      "nutritionLogging": "Nutrition logged on {days} of 7 days",
+      "nutritionTarget": "Average {avg} kcal (target {target} kcal)",
+      "weightChange": "Weight since start of week: {kg} kg",
+      "recommendation": {
+        "FOCUS_ON_TRAINING_SESSIONS": "There's still time for your training this week -- the next planned session is waiting.",
+        "FOCUS_ON_NUTRITION_LOGGING": "Daily logging has been harder this week -- even a quick entry helps keep the overview.",
+        "NUTRITION_OFF_TARGET": "Your calorie intake is notably off target this week -- a look at portion sizes might help.",
+        "ON_TRACK": "This week went smoothly -- keep it up."
+      }
+    },
     "export": {
       "json": "Export as JSON",
       "csv": "Export as CSV"

@@ -2,12 +2,13 @@ package de.optadata.odil.onshape.billing
 
 /**
  * BIZ-01: die Feature-Matrix aus KONZEPT.md §15.1, als reine, DB-freie Konstanten (NFR-13
- * testbar). Von den 17 Zeilen der Tabelle sind nur vier gegen bereits bestehende Funktionen
- * durchsetzbar -- der Rest ist entweder in jedem Tier unbegrenzt (Lebensmittel-Logging,
- * Barcode-Scanner, Makro-Tracking, Trainings-Logging, Datenexport -- Letzteres zusaetzlich aus
- * DSGVO-Gruenden, §14, nie einschraenkbar) oder betrifft Features, die in keinem bisherigen
- * Epic gebaut wurden (Adaptives TDEE/FR-134, Foto-KI/Epic #5, Rezept-URL-Import/FR-27,
- * Wearable-Sync/FR-150f, Formanalyse/FR-115ff, Wochenbericht/FR-135, KI-Coach-Chat,
+ * testbar). Von den 17 Zeilen der Tabelle sind fuenf gegen bereits bestehende Funktionen
+ * durchsetzbar (die fuenfte, Wochenbericht/FR-135, seit Epic Fortschritt&Auswertung-Nachtrag,
+ * siehe [canShowWeeklyReport]) -- der Rest ist entweder in jedem Tier unbegrenzt
+ * (Lebensmittel-Logging, Barcode-Scanner, Makro-Tracking, Trainings-Logging, Datenexport --
+ * Letzteres zusaetzlich aus DSGVO-Gruenden, §14, nie einschraenkbar) oder betrifft Features, die
+ * in keinem bisherigen Epic gebaut wurden (Adaptives TDEE/FR-134, Foto-KI/Epic #5,
+ * Rezept-URL-Import/FR-27, Wearable-Sync/FR-150f, Formanalyse/FR-115ff, KI-Coach-Chat,
  * individuelle Periodisierung) -- fuer die gibt es folgerichtig noch keine Gate-Logik, nur die
  * Tier-Zuordnung selbst ist hier als Referenz fuer die jeweils spaetere Umsetzung dokumentiert.
  */
@@ -60,4 +61,8 @@ object TierPolicy {
 
     fun <T> filterMicros(tier: Tier, micros: Map<String, T>): Map<String, T> =
         if (tier == Tier.FREE) micros.filterKeys { it in MICRONUTRIENT_BASIS_KEYS } else micros
+
+    /** "Wochenbericht: —/✓/✓" (§15.1) -- anders als die Gates oben ist das kein Kontingent,
+     * sondern eine vollstaendige Sperre fuer FREE (FR-135, Epic Fortschritt & Auswertung). */
+    fun canShowWeeklyReport(tier: Tier): Boolean = tier != Tier.FREE
 }

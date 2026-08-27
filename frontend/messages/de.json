@@ -374,6 +374,23 @@
       "title": "Kraftverlauf (geschaetztes 1RM)",
       "empty": "Noch keine geloggten Uebungen."
     },
+    "weeklyReport": {
+      "title": "Wochenbericht",
+      "requiresUpgrade": "Der Wochenbericht ist ein Plus/Coach-Feature.",
+      "upgradeLink": "Jetzt upgraden",
+      "previousWeek": "◄ Vorherige Woche",
+      "nextWeek": "Naechste Woche ►",
+      "training": "{completed} von {planned} geplanten Trainingseinheiten absolviert",
+      "nutritionLogging": "An {days} von 7 Tagen Ernaehrung geloggt",
+      "nutritionTarget": "Durchschnitt {avg} kcal (Ziel {target} kcal)",
+      "weightChange": "Gewicht seit Wochenbeginn: {kg} kg",
+      "recommendation": {
+        "FOCUS_ON_TRAINING_SESSIONS": "Diese Woche ist noch Zeit fuer dein Training -- die naechste geplante Einheit wartet.",
+        "FOCUS_ON_NUTRITION_LOGGING": "Taegliches Loggen faellt diese Woche schwerer -- schon ein kurzer Eintrag hilft, den Ueberblick zu behalten.",
+        "NUTRITION_OFF_TARGET": "Deine Kalorienzufuhr weicht diese Woche spuerbar vom Ziel ab -- ein Blick auf die Portionsgroessen kann helfen.",
+        "ON_TRACK": "Diese Woche lief rund -- weiter so."
+      }
+    },
     "export": {
       "json": "Export als JSON",
       "csv": "Export als CSV"

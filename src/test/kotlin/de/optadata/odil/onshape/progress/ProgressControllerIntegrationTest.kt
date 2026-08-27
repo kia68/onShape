@@ -3,6 +3,11 @@ package de.optadata.odil.onshape.progress
 import de.optadata.odil.onshape.AbstractIntegrationTest
 import de.optadata.odil.onshape.auth.AuthResponse
 import de.optadata.odil.onshape.auth.RegisterRequest
+import de.optadata.odil.onshape.billing.BillingPeriod
+import de.optadata.odil.onshape.billing.SubscriptionRepository
+import de.optadata.odil.onshape.billing.SubscriptionStatus
+import de.optadata.odil.onshape.billing.Tier
+import de.optadata.odil.onshape.security.RlsSession
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -32,8 +37,20 @@ class ProgressControllerIntegrationTest : AbstractIntegrationTest() {
     @Autowired lateinit var mockMvc: MockMvc
     @Autowired lateinit var objectMapper: ObjectMapper
     @Autowired lateinit var jdbcTemplate: JdbcTemplate
+    @Autowired lateinit var subscriptionRepository: SubscriptionRepository
+    @Autowired lateinit var rlsSession: RlsSession
 
     private fun bearer(token: String) = "Bearer $token"
+
+    private fun grantPlus(userId: UUID) {
+        rlsSession.asUser(userId) {
+            subscriptionRepository.upsert(
+                userId, Tier.PLUS, BillingPeriod.MONTHLY, SubscriptionStatus.ACTIVE,
+                isLifetime = false, stripeCustomerId = null, stripeSubscriptionId = null,
+                currentPeriodEnd = null, at = java.time.Instant.now(),
+            )
+        }
+    }
 
     private fun registerAndOnboard(): String = registerAndOnboardReturningUserId().first
 
@@ -211,5 +228,78 @@ class ProgressControllerIntegrationTest : AbstractIntegrationTest() {
         assertTrue("food_entries.csv" in entryNames)
         assertTrue("workout_sets.csv" in entryNames)
         assertTrue("programs.csv" in entryNames)
+    }
+
+    @Test
+    fun `wochenbericht ist im free-tier komplett gesperrt`() {
+        val token = registerAndOnboard()
+        mockMvc.perform(
+            get("/api/progress/weekly-report").param("weekStart", "2026-02-02")
+                .header(HttpHeaders.AUTHORIZATION, bearer(token)),
+        ).andExpect(status().isUnprocessableEntity)
+            .andExpect(jsonPath("$.code").value("weekly_report_requires_upgrade"))
+    }
+
+    @Test
+    fun `wochenbericht zeigt on-track bei vollstaendigem training und ziel-nahem logging`() {
+        val (token, userId) = registerAndOnboardReturningUserId()
+        grantPlus(userId)
+
+        val targetKcal = objectMapper.readTree(
+            mockMvc.perform(
+                get("/api/progress/nutrition").param("from", "2026-02-02").param("to", "2026-02-08")
+                    .header(HttpHeaders.AUTHORIZATION, bearer(token)),
+            ).andReturn().response.contentAsString,
+        ).get("targetKcal").asInt()
+
+        // trainingDaysWeek = 3 (siehe registerAndOnboardReturningUserId) -- drei Sessions in der
+        // Zielwoche direkt per SQL, da die Trainlog-API immer mit now() loggt.
+        for (startedAt in listOf("2026-02-02 08:00:00", "2026-02-04 08:00:00", "2026-02-06 08:00:00")) {
+            jdbcTemplate.update("INSERT INTO workout_sessions (user_id, started_at) VALUES (?, ?::timestamptz)", userId, startedAt)
+        }
+
+        // Ein Food mit kcal == Tagesziel, an 6 von 7 Tagen mit exakt 100g geloggt -> avgKcal ==
+        // targetKcal (0% Abweichung, GOOD) und Logging-Adhaerenz 6/7 (GOOD).
+        val foodId = seedFood("Wochenbericht-Testfood-${System.nanoTime()}", targetKcal.toDouble())
+        for (day in listOf("2026-02-02", "2026-02-03", "2026-02-04", "2026-02-05", "2026-02-06", "2026-02-07")) {
+            mockMvc.perform(
+                post("/api/nutrition/entries").header(HttpHeaders.AUTHORIZATION, bearer(token))
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(
+                        objectMapper.writeValueAsString(
+                            mapOf("foodId" to foodId, "loggedDate" to day, "slot" to "breakfast", "grams" to 100.0, "method" to "search"),
+                        ),
+                    ),
+            ).andExpect(status().isCreated)
+        }
+
+        val response = mockMvc.perform(
+            get("/api/progress/weekly-report").param("weekStart", "2026-02-02")
+                .header(HttpHeaders.AUTHORIZATION, bearer(token)),
+        ).andExpect(status().isOk).andReturn().response.contentAsString
+        val json = objectMapper.readTree(response)
+        assertEquals("2026-02-02", json.get("weekStart").asText())
+        assertEquals(3, json.get("sessionsCompleted").asInt())
+        assertEquals(3, json.get("sessionsPlanned").asInt())
+        assertEquals(6, json.get("nutritionDaysLogged").asInt())
+        assertEquals("GOOD", json.get("trainingRating").asText())
+        assertEquals("GOOD", json.get("nutritionLoggingRating").asText())
+        assertEquals("GOOD", json.get("nutritionTargetRating").asText())
+        assertEquals("ON_TRACK", json.get("recommendation").asText())
+    }
+
+    @Test
+    fun `wochenbericht empfiehlt training wenn diese woche nichts absolviert wurde`() {
+        val (token, userId) = registerAndOnboardReturningUserId()
+        grantPlus(userId)
+
+        val response = mockMvc.perform(
+            get("/api/progress/weekly-report").param("weekStart", "2026-02-02")
+                .header(HttpHeaders.AUTHORIZATION, bearer(token)),
+        ).andExpect(status().isOk).andReturn().response.contentAsString
+        val json = objectMapper.readTree(response)
+        assertEquals(0, json.get("sessionsCompleted").asInt())
+        assertEquals("NEEDS_ATTENTION", json.get("trainingRating").asText())
+        assertEquals("FOCUS_ON_TRAINING_SESSIONS", json.get("recommendation").asText())
     }
 }

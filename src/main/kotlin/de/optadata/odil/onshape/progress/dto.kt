@@ -24,3 +24,23 @@ data class WeeklyMuscleVolumeResponse(
     val corridorMin: Int,
     val corridorMax: Int,
 )
+
+data class WeeklyReportResponse(
+    val weekStart: LocalDate,
+    val weekEnd: LocalDate,
+    val sessionsCompleted: Int,
+    val sessionsPlanned: Int,
+    val nutritionDaysLogged: Int,
+    val avgKcal: Double?,
+    val targetKcal: Int?,
+    /** Informativ, NICHT Teil der Bewertung -- siehe WeeklyReportGenerator-KDoc. */
+    val weightChangeKg: Double?,
+    val trainingRating: Rating,
+    val nutritionLoggingRating: Rating,
+    val nutritionTargetRating: Rating?,
+    val recommendation: WeeklyReportRecommendation,
+)
+
+/** BIZ-01 (§15.1 "Wochenbericht: —" im Free-Tier), siehe [de.optadata.odil.onshape.billing.TierPolicy.canShowWeeklyReport]. */
+class WeeklyReportRequiresUpgradeException :
+    RuntimeException("Wochenbericht ist ein Plus/Coach-Feature -- auf Plus/Coach upgraden")

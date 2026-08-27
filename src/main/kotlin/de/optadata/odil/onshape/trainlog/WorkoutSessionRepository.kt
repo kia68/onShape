@@ -89,6 +89,14 @@ class WorkoutSessionRepository(private val jdbcTemplate: JdbcTemplate) {
             Int::class.java, userId, Timestamp.from(since),
         ) ?: 0
 
+    /** FR-135 (Wochenbericht): begonnene Workouts innerhalb eines festen Zeitfensters, anders
+     * als [countStartedSince] (nur unterer Rand, "seit X"). */
+    fun countStartedBetween(userId: UUID, from: Instant, to: Instant): Int =
+        jdbcTemplate.queryForObject(
+            "SELECT count(*) FROM workout_sessions WHERE user_id = ? AND started_at >= ? AND started_at < ?",
+            Int::class.java, userId, Timestamp.from(from), Timestamp.from(to),
+        ) ?: 0
+
     fun findHistory(userId: UUID, limit: Int): List<WorkoutSession> =
         jdbcTemplate.query(
             "$SELECT_SQL WHERE user_id = ? AND finished_at IS NOT NULL ORDER BY started_at DESC LIMIT ?",

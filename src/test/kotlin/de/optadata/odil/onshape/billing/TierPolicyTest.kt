@@ -53,4 +53,11 @@ class TierPolicyTest {
         assertEquals(full, TierPolicy.filterMicros(Tier.PLUS, full))
         assertEquals(full, TierPolicy.filterMicros(Tier.COACH, full))
     }
+
+    @Test
+    fun `wochenbericht ist komplett gesperrt im free-tier, sonst frei`() {
+        assertFalse(TierPolicy.canShowWeeklyReport(Tier.FREE))
+        assertTrue(TierPolicy.canShowWeeklyReport(Tier.PLUS))
+        assertTrue(TierPolicy.canShowWeeklyReport(Tier.COACH))
+    }
 }

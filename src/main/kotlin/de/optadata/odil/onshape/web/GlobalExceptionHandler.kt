@@ -11,6 +11,7 @@ import de.optadata.odil.onshape.legal.CoreConsentRequiredException
 import de.optadata.odil.onshape.onboarding.GoalRateExceededException
 import de.optadata.odil.onshape.onboarding.TargetWeightBmiTooLowException
 import de.optadata.odil.onshape.onboarding.UnderMinimumAgeException
+import de.optadata.odil.onshape.progress.WeeklyReportRequiresUpgradeException
 import de.optadata.odil.onshape.training.ProgramLimitExceededException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -52,6 +53,10 @@ class GlobalExceptionHandler {
     @ExceptionHandler(ProgramLimitExceededException::class)
     fun handleProgramLimitExceeded(e: ProgramLimitExceededException) =
         ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ApiError("program_limit_exceeded", e.message ?: "program limit exceeded"))
+
+    @ExceptionHandler(WeeklyReportRequiresUpgradeException::class)
+    fun handleWeeklyReportRequiresUpgrade(e: WeeklyReportRequiresUpgradeException) =
+        ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(ApiError("weekly_report_requires_upgrade", e.message ?: "weekly report requires upgrade"))
 
     @ExceptionHandler(BillingNotConfiguredException::class)
     fun handleBillingNotConfigured(e: BillingNotConfiguredException) =

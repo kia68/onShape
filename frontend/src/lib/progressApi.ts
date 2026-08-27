@@ -59,6 +59,34 @@ export function fetchVolumeHistory(from: string, to: string) {
   return request<WeeklyMuscleVolume[]>(`/api/progress/volume?${params.toString()}`);
 }
 
+export type Rating = "GOOD" | "NEUTRAL" | "NEEDS_ATTENTION";
+export type WeeklyReportRecommendation =
+  | "FOCUS_ON_TRAINING_SESSIONS"
+  | "FOCUS_ON_NUTRITION_LOGGING"
+  | "NUTRITION_OFF_TARGET"
+  | "ON_TRACK";
+
+export interface WeeklyReport {
+  weekStart: string;
+  weekEnd: string;
+  sessionsCompleted: number;
+  sessionsPlanned: number;
+  nutritionDaysLogged: number;
+  avgKcal: number | null;
+  targetKcal: number | null;
+  weightChangeKg: number | null;
+  trainingRating: Rating;
+  nutritionLoggingRating: Rating;
+  nutritionTargetRating: Rating | null;
+  recommendation: WeeklyReportRecommendation;
+}
+
+/** BIZ-01: Plus/Coach-Feature, Free-Tier bekommt `weekly_report_requires_upgrade` (422). */
+export function fetchWeeklyReport(weekStart?: string) {
+  const params = weekStart ? `?${new URLSearchParams({ weekStart }).toString()}` : "";
+  return request<WeeklyReport>(`/api/progress/weekly-report${params}`);
+}
+
 export interface LoggedExercise {
   id: string;
   name: string;

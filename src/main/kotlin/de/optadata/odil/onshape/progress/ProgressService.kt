@@ -8,11 +8,13 @@ import de.optadata.odil.onshape.onboarding.NutritionTargetRepository
 import de.optadata.odil.onshape.onboarding.ProfileRepository
 import de.optadata.odil.onshape.security.RlsSession
 import de.optadata.odil.onshape.training.VolumeCorridor
+import de.optadata.odil.onshape.trainlog.WorkoutSessionRepository
 import de.optadata.odil.onshape.trainlog.WorkoutSetRepository
 import org.springframework.stereotype.Service
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.Period
+import java.time.ZoneOffset
 import java.util.UUID
 
 @Service
@@ -22,6 +24,7 @@ class ProgressService(
     private val nutritionTargetRepository: NutritionTargetRepository,
     private val profileRepository: ProfileRepository,
     private val workoutSetRepository: WorkoutSetRepository,
+    private val workoutSessionRepository: WorkoutSessionRepository,
     private val subscriptionService: SubscriptionService,
     private val rlsSession: RlsSession,
 ) {
@@ -83,4 +86,66 @@ class ProgressService(
             WeeklyMuscleVolumeResponse(it.weekStart, it.muscle, it.sets, corridor?.startSetsPerMuscle ?: 0, corridor?.maxSetsPerMuscle ?: 0)
         }
     }
+
+    /** FR-135. BIZ-01: Free-Tier hat gar keinen Zugriff (siehe [TierPolicy.canShowWeeklyReport]),
+     * anders als die anderen Fortschritts-Endpunkte, die nur eingeschraenkt sind. [weekStart]
+     * MUSS ein Montag sein (gleiche Wochendefinition wie die `weeklyAverages`-Gruppierung in
+     * [nutritionHistory]) -- der Aufrufer (Controller) klemmt darauf. */
+    fun weeklyReport(userId: UUID, weekStart: LocalDate): WeeklyReportResponse {
+        if (!TierPolicy.canShowWeeklyReport(subscriptionService.currentTier(userId))) {
+            throw WeeklyReportRequiresUpgradeException()
+        }
+        val weekEnd = weekStart.plusDays(6)
+        val weekStartInstant = weekStart.atStartOfDay(ZoneOffset.UTC).toInstant()
+        val weekEndExclusiveInstant = weekEnd.plusDays(1).atStartOfDay(ZoneOffset.UTC).toInstant()
+
+        val (profile, daily, target, sessionsCompleted, weightHistory) = rlsSession.asUser(userId) {
+            WeeklyReportRawData(
+                profile = profileRepository.findByUserId(userId),
+                daily = foodEntryRepository.findDailyTotals(userId, weekStart, weekEnd),
+                target = nutritionTargetRepository.findLatest(userId),
+                sessionsCompleted = workoutSessionRepository.countStartedBetween(userId, weekStartInstant, weekEndExclusiveInstant),
+                weightHistory = bodyMeasurementRepository.findHistory(userId, weekStart, weekEnd),
+            )
+        }
+
+        val daysLogged = daily.map { it.date }.toSet().size
+        val avgKcal = if (daily.isEmpty()) null else daily.sumOf { it.kcal } / daily.size
+        // findHistory liefert DESC (neueste zuerst) -- fuer eine chronologische Differenz
+        // muss hier aufsteigend sortiert werden, sonst kehrt sich das Vorzeichen um.
+        val weights = weightHistory.sortedBy { it.measuredOn }.mapNotNull { it.weightKg }
+        val weightChangeKg = if (weights.size >= 2) weights.last() - weights.first() else null
+
+        val input = WeeklyReportInput(
+            sessionsCompleted = sessionsCompleted,
+            sessionsPlanned = profile?.trainingDaysWeek ?: 0,
+            nutritionDaysLogged = daysLogged,
+            avgKcal = avgKcal,
+            targetKcal = target?.result?.kcal,
+        )
+        val result = WeeklyReportGenerator.generate(input)
+
+        return WeeklyReportResponse(
+            weekStart = weekStart,
+            weekEnd = weekEnd,
+            sessionsCompleted = sessionsCompleted,
+            sessionsPlanned = input.sessionsPlanned,
+            nutritionDaysLogged = daysLogged,
+            avgKcal = avgKcal,
+            targetKcal = input.targetKcal,
+            weightChangeKg = weightChangeKg,
+            trainingRating = result.trainingRating,
+            nutritionLoggingRating = result.nutritionLoggingRating,
+            nutritionTargetRating = result.nutritionTargetRating,
+            recommendation = result.recommendation,
+        )
+    }
+
+    private data class WeeklyReportRawData(
+        val profile: de.optadata.odil.onshape.onboarding.Profile?,
+        val daily: List<de.optadata.odil.onshape.nutrition.DailyNutritionTotal>,
+        val target: de.optadata.odil.onshape.onboarding.StoredNutritionTarget?,
+        val sessionsCompleted: Int,
+        val weightHistory: List<de.optadata.odil.onshape.onboarding.BodyMeasurement>,
+    )
 }
